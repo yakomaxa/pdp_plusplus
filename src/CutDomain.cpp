@@ -9,7 +9,6 @@ CutDomain::CutDomain(std::vector<Atom> &ca, PDPDistanceMatrix &pdpMatrix, std::v
     this->ndom = 0;
     this->domains = std::vector<Domain>();
     this->init_cutsites = init_cutsites;
-    this->val = CutValues();
 }
 
 void CutDomain::cutDomain(Domain& dom, CutSites& cut_sites,PDPDistanceMatrix& pdpMatrix) {
@@ -17,30 +16,27 @@ void CutDomain::cutDomain(Domain& dom, CutSites& cut_sites,PDPDistanceMatrix& pd
     int i, site;
     
     Domain dom1;
-    Domain dom2;       
-    Cut cut;
+    Domain dom2;
+    
+    CutValues val;
     val.s_min = 100;
     val.site2 = 0;
-    site = -1;
     val.first_cut = true;
+    
+    Cut cut;
     if (init_cutsites.size()<=0){
       printf("CUTTING DE NOVO\n");
-      val = cut.cut(CutDomain::ca, dom, val, CutDomain::dist, pdpMatrix);
-      site = val.site_min;
+      site = cut.cut(CutDomain::ca, dom, val, CutDomain::dist, pdpMatrix);
     }else{
       printf("CUTTING OF GIVEN\n");
       site = CutDomain::init_cutsites.back();
       CutDomain::init_cutsites.pop_back();
     }
-    //    printf("site %i \n",site)   ;
-    //    printf("Cutting at position(s): %d %d %f\n",site, val.site2, score);
-    printf("Cutting at position(s): %d %d %f\n",site, val.site2, val.s_min);
-    printf("AAAAAAAAAAA\n");
+    printf("site %i \n",site)   ;
     if (site < 0) {
       dom.setScore(val.s_min);
       CutDomain::domains.push_back(dom);
       CutDomain::ndom++;
-      printf("Exiting CutDomain since site < 0\n");
       return;
     }
 

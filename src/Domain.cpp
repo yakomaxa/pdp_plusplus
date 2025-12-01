@@ -1,4 +1,3 @@
-#include <algorithm>
 #include "Domain.hpp"
 
 Domain::Domain() : size(0), nseg(0), score(0.0) {}
@@ -81,9 +80,4 @@ void Domain::pushbackContacted(int i){
 
 void Domain::removeContacted(int i){
   std::erase(contacted,i);
-}
-
-void Domain::makeSet(){
-  std::sort(contacted.begin(), contacted.end());
-  contacted.erase(std::unique(contacted.begin(), contacted.end()), contacted.end());
 }

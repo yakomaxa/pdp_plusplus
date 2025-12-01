@@ -7,23 +7,23 @@
 
 bool verbose = false;
 
-CutValues Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
+int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
              std::vector<std::vector<int>>& dist,
              PDPDistanceMatrix& pdpMatrix){
-
+    
         int nclose = pdpMatrix.getNclose();
 	////printf("nclose %i\n",nclose);
-	std::vector<int> iclose = pdpMatrix.getIclose();
-	std::vector<int> jclose = pdpMatrix.getJclose();
+        std::vector<int> iclose = pdpMatrix.getIclose();
+        std::vector<int> jclose = pdpMatrix.getJclose();
 
 
-	//int nclose_raw = pdpMatrix.getNclose_raw();
-	//std::vector<int> iclose_raw = pdpMatrix.getIclose_raw();
-        //std::vector<int> jclose_raw = pdpMatrix.getJclose_raw();
+	int nclose_raw = pdpMatrix.getNclose_raw();
+	std::vector<int> iclose_raw = pdpMatrix.getIclose_raw();
+        std::vector<int> jclose_raw = pdpMatrix.getJclose_raw();
 
 	
         std::vector<int> contacts(PDPParameters::MAXLEN);
-	std::vector<double> max_contacts(PDPParameters::MAXLEN);
+        std::vector<double> max_contacts(PDPParameters::MAXLEN);
         std::vector<double> contact_density(PDPParameters::MAXLEN);
         double average_density,x,y;
 
@@ -38,8 +38,7 @@ CutValues Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
         int from,to,from1,to1,from2,to2,lseg;
 
 
-        val.site_min = -1;
-	val.s_min = 100;
+        int site_min = -1;
 
 
         // AP add sort here..
@@ -47,7 +46,7 @@ CutValues Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
         // what is going on with the segments??
 
 	//        std::vector<Segment> segments = dom.getSegments();
-	//std::sort(dom.getSegments().begin(), dom.getSegments().end(), SegmentComparator());
+	std::sort(dom.getSegments().begin(), dom.getSegments().end(), SegmentComparator());
     
         average_density = 0.0;
         size0=0;
@@ -68,9 +67,9 @@ CutValues Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 	  
 	  //printf("---Starting loop4\n");
 
-	  for (int n = 0; n < nclose; n++){
-	    i=iclose[n];
-	    j=jclose[n];
+	  for (int n = 0; n < nclose_raw; n++){
+	    i=iclose_raw[n];
+	    j=jclose_raw[n];
 	    for(jseg=0;jseg<iseg;jseg++) {
 	      from1 = dom.getSegmentAtPos(jseg).getFrom();
 	      to1 = dom.getSegmentAtPos(jseg).getTo();
@@ -113,9 +112,9 @@ CutValues Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 	    size11=size1t+(k-from+1);
 	    size22=size2t+(to-k);
 	    //printf("---------Starting loop9\n");
-	    for (int n = 0; n < nclose; n++){
-	      i=iclose[n];
-	      j=jclose[n];
+	    for (int n = 0; n < nclose_raw; n++){
+	      i=iclose_raw[n];
+	      j=jclose_raw[n];
 	      if(from<=i && i<=k){
 		//printf("----------Starting loop10\n");
 		for(kseg=iseg+1;kseg<dom.getNseg();kseg++) {
@@ -206,8 +205,6 @@ CutValues Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 	      
 	    };
 	    contact_density[k]=contacts[k]/max_contacts[k];
-
-	    printf("%d  %d      %d      %f      %f      %d      %d      %f\n",k,size1,size2,x,y,max_contacts[k],contacts[k],contact_density[k]);
 	    
 	    if(from==0){
 	      endsf = PDPParameters::ENDSEND;
@@ -223,7 +220,7 @@ CutValues Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 	    
 	    if((contact_density[k])<val.s_min && k > from + endsf && k< to - endst) {
 	      val.s_min = (contact_density[k]);
-	      val.site_min=k+1;
+	      site_min=k+1;
 	    }
 	    if(k>from+endsf&&k<to-endst) {
 	      average_density+=contact_density[k];
@@ -231,14 +228,11 @@ CutValues Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 	    }
 	  };
 	};
-
-	//	if (size0>0){
+	if (size0>0){
 	  average_density/=size0;
-	  std::cout << "Trying to cut domain of size %d having %d segments and  average cont_density %f\n" << dom.getSize() << dom.getNseg() << average_density << std::endl ;
-	  //	}else{
-	  //	  val.site_min = -1;
-	  //	  return val;	  
-	  //	}
+	}else{
+	  return -1;	  
+	}
 	
 	if(val.first_cut) {
 	  val.AD = average_density;
@@ -246,8 +240,6 @@ CutValues Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 	val.AD = average_density;
 	
 	val.s_min/=val.AD;
-
-	printf("after single cut: s_min = %f site_min = %d\n",val.s_min,val.site_min);
 	
 	k=0;	
 	nc=0;
@@ -410,27 +402,21 @@ CutValues Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 	    max_contacts[k] = 9*x*y;
 	  }
 	  contact_density[nc]=contacts[nc]/max_contacts[nc];
-
-	  //printf(" double cut: %d     %s %d %d c=%d mc=%d x=%f y=%f s1=%d s2=%d cd=%f cd/ad=%f\n",l, protein.res[iclose[l]].type,iclose[l],jclose[l],contacts[nc],max_contacts[nc],x,y,size11,size22,contact_density[nc],contact_density[nc]/AD);
-	  printf(" double cut: %d %d %d c=%d mc=%d x=%f y=%f s1=%d s2=%d cd=%f cd/ad=%f\n",l,iclose[l],jclose[l],contacts[nc],max_contacts[nc],x,y,size11,size22,contact_density[nc],contact_density[nc]/val.AD);
-
 	  if((contact_density[nc]/val.AD+PDPParameters::DBL)<val.s_min&&contact_density[nc]/val.AD+PDPParameters::DBL<PDPParameters::CUT_OFF_VALUE2) {
 	    val.s_min = (contact_density[nc]/val.AD)+PDPParameters::DBL;
-	    val.site_min=iclose[l];
+	    site_min=iclose[l];
 	    val.site2=jclose[l];
 	  }
 	  nc++;
-	  //if ( nc >= PDPParameters::MAXSIZE)
-	  //	    nc = PDPParameters::MAXSIZE-1;
+	  if ( nc >= PDPParameters::MAXSIZE)
+	    nc = PDPParameters::MAXSIZE-1;
 	}
 	val.first_cut=false;
-	printf("at the end of cut: s_min %f CUTOFF %f site_min %d *site2 %d\n",val.s_min,PDPParameters::CUT_OFF_VALUE,val.site_min,val.site2);
 	if(val.s_min> PDPParameters::CUT_OFF_VALUE){
-	  val.site_min = -1;
-	  return val;
+	  return -1;
 	}
 	
-	return(val);
+	return(site_min);
 }
 
 

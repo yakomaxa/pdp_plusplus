@@ -31,7 +31,6 @@ public:
     std::vector<int> getContacted() const;
     void pushbackContacted(int i);
     void removeContacted(int i);
-    void makeSet();
 
   //    std::vector<int> contacts;
 private:

@@ -109,7 +109,7 @@ std::vector<Domain> combine(std::vector<Domain> &domains, int Si, int Sj, double
   std::erase(ClusterDomains::visibleDomains,Sj);
   
   for (int k : domains[Sj].getContacted()){
-    domains[Si].removeContacted(k);
+    //domains[Si].removeContacted(k);
     domains[Si].pushbackContacted(k);
     domains[k].removeContacted(Si);
     domains[k].pushbackContacted(Si);
@@ -181,19 +181,21 @@ std::vector<Domain> ClusterDomains::cluster(
   std::vector<std::vector<int>> contacts_list((ClusterDomains::ndom), std::vector<int>(ClusterDomains::ndom));
   std::vector<std::vector<int>> dist = pdpDistMatrix.getDist();
   int tmp=0;
+  int total_contacts = 0;
   for(int n = 0 ; n < n_can; n++) {
+    total_contacts = 0 ;
     i = i_can_contact[n];
     j = j_can_contact[n];
     
-    if (i > j){
-      tmp = i;
-      i = j;
-      j = tmp;	
-    }
+    //    if (i >= j){
+    //      tmp = i;
+    //      i = j;
+    //      j = tmp;	
+    //    }
     d1 = domains.at(i);    
     d2 = domains.at(j);
 
-    int total_contacts = 0;
+
     for(int k=0; k<d1.getNseg(); k++) {
       int a1=d1.getSegmentAtPos(k).getFrom();
       int b1=d1.getSegmentAtPos(k).getTo();      
@@ -208,35 +210,25 @@ std::vector<Domain> ClusterDomains::cluster(
       }
     }
         
-    std::cout << " pos: d1:" << i << " vs d2:" << j << " d1:" << d1.getSegmentAtPos(0).getFrom() << "-" << d1.getSegmentAtPos(0).getTo() << " " <<  d2.getSegmentAtPos(0).getFrom() << "-" << d2.getSegmentAtPos(0).getTo() << " " << total_contacts << " d1-size1=" << d1.getSize() << " d2-size2=" << d2.getSize() << "\n" ;
+    std::cout << " pos: d1:" << i << " vs d2:" << j << " d1:" << d1.getSegmentAtPos(0).getFrom() << "-" << d1.getSegmentAtPos(0).getTo() << " " <<  d2.getSegmentAtPos(0).getFrom() << "-" << d2.getSegmentAtPos(0).getTo() << " " << total_contacts << "\n" ;
     contacts_list[i][j]=contacts_list[j][i]=total_contacts;
      if (total_contacts > 0){
       domains[i].pushbackContacted(j);
       domains[j].pushbackContacted(i);
-      //ClusterDomains::visibleDomains.push_back(i);
-      //ClusterDomains::visibleDomains.push_back(j);
-      ClusterDomains::visibleDomains.push_back(i);
-      ClusterDomains::visibleDomains.push_back(j);
      }
   }
-  std::sort(ClusterDomains::visibleDomains.begin(), ClusterDomains::visibleDomains.end());
-  ClusterDomains::visibleDomains.erase(std::unique(ClusterDomains::visibleDomains.begin(), ClusterDomains::visibleDomains.end()), ClusterDomains::visibleDomains.end());
-  for (int i = 0; i < ClusterDomains::ndom; i++){
-    domains[i].makeSet();
-  }
   
-  //for (int i = 0 ; i < (int)domains.size() ;i++){
-  //    ClusterDomains::visibleDomains.push_back(i);
-  //  }
+  for (int i = 0 ; i < (int)domains.size() ;i++){
+    ClusterDomains::visibleDomains.push_back(i);
+  }
 
 
   //  std::vector<Domain> olddomains = domains; 
   do {
     //    std::vector<std::vector<int>> contacts;    
-    for(int i : ClusterDomains::visibleDomains){
-      //std::sort(domains[i].getContacted().begin(),domains[i].getContacted().end());
+    for(int i : ClusterDomains::visibleDomains){      
       for (int j : domains[i].getContacted()){
-       	if (j==i){
+       	if (j<=i){
 	  continue;
 	}
 	int total_contacts = contacts_list[i][j];

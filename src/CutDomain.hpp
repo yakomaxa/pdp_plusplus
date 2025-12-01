@@ -18,7 +18,6 @@ private:
   std::vector<std::vector<int>> dist;
   std::vector<Atom> ca;
   std::vector<int> init_cutsites;
-  CutValues val;
   
 public:
   static bool verbose;

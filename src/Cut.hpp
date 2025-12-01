@@ -19,7 +19,7 @@ class Cut {
 private:
     
 public:
-    CutValues cut(std::vector<Atom>& ca,
+    int cut(std::vector<Atom>& ca,
             Domain& dom,
             CutValues& val,
             std::vector<std::vector<int>>& dist,
