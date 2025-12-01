@@ -7,7 +7,9 @@ class CutValues {
 public:
     double s_min;
     int site2;
+    int site_min;
     bool first_cut;
+
 
     double AD;
 

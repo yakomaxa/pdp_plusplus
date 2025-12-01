@@ -30,8 +30,8 @@ PDPDistanceMatrix GetDistanceMatrix::getDistanceMatrix(std::vector<Atom>& protei
   float dy=0;
   float dz=0;
   
-  std::vector<std::vector<int>> dist(PDPParameters::MAXLEN+3,
-				     std::vector<int>(PDPParameters::MAXLEN+3));
+  std::vector<std::vector<int>> dist(PDPParameters::MAXLEN,
+				     std::vector<int>(PDPParameters::MAXLEN));
   int i,j;
   float d,dt1,dt2,dt3,dt4;
   int nc=0;  
@@ -49,9 +49,9 @@ PDPDistanceMatrix GetDistanceMatrix::getDistanceMatrix(std::vector<Atom>& protei
   dt4=36;
 
   // counter loop to count loosest contacts 
-  for(i=0; i < (int)protein.size()-1; i++) {
+  for(i=0; i < (int)protein.size(); i++) {
     Atom ca1 = protein.at(i);
-    for(j=i+1; j < (int)protein.size(); j++) {
+    for(j=i; j < (int)protein.size(); j++) {
       Atom ca2 = protein.at(j);          
       dx = ca1.getX() - ca2.getX();
       dy = ca1.getY() - ca2.getY();
@@ -60,6 +60,8 @@ PDPDistanceMatrix GetDistanceMatrix::getDistanceMatrix(std::vector<Atom>& protei
       if(d<dt1) {
 	nc++;
       }
+      dist[i][j]=0;
+      dist[j][i]=0;       
     }
   }
 
@@ -74,13 +76,9 @@ PDPDistanceMatrix GetDistanceMatrix::getDistanceMatrix(std::vector<Atom>& protei
 
   // make dist (not distance but contacts although...) matrix
   for(i=0; i < (int)protein.size(); i++) {
-    dist[i][i]=0;       
-  }
-
-  for(i=0; i < (int)protein.size()-1; i++) {
     Atom ca1 = protein.at(i);
     std::string  chain1 = protein.at(i).getChain();
-    for(j=i+1; j < (int)protein.size(); j++) {
+    for(j=i; j < (int)protein.size(); j++) {
       std::string  chain2 = protein.at(j).getChain();
       Atom ca2 = protein.at(j);          
       dx = ca1.getX() - ca2.getX();
@@ -157,5 +155,4 @@ PDPDistanceMatrix GetDistanceMatrix::getDistanceMatrix(std::vector<Atom>& protei
   matrix.setDist(dist);
   return matrix;
 }
-
 

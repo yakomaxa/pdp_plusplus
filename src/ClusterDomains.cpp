@@ -185,7 +185,7 @@ std::vector<Domain> ClusterDomains::cluster(
     i = i_can_contact[n];
     j = j_can_contact[n];
     
-    if (i >= j){
+    if (i > j){
       tmp = i;
       i = j;
       j = tmp;	
@@ -208,24 +208,33 @@ std::vector<Domain> ClusterDomains::cluster(
       }
     }
         
-    std::cout << " pos: d1:" << i << " vs d2:" << j << " d1:" << d1.getSegmentAtPos(0).getFrom() << "-" << d1.getSegmentAtPos(0).getTo() << " " <<  d2.getSegmentAtPos(0).getFrom() << "-" << d2.getSegmentAtPos(0).getTo() << " " << total_contacts << "\n" ;
+    std::cout << " pos: d1:" << i << " vs d2:" << j << " d1:" << d1.getSegmentAtPos(0).getFrom() << "-" << d1.getSegmentAtPos(0).getTo() << " " <<  d2.getSegmentAtPos(0).getFrom() << "-" << d2.getSegmentAtPos(0).getTo() << " " << total_contacts << " d1-size1=" << d1.getSize() << " d2-size2=" << d2.getSize() << "\n" ;
     contacts_list[i][j]=contacts_list[j][i]=total_contacts;
      if (total_contacts > 0){
       domains[i].pushbackContacted(j);
       domains[j].pushbackContacted(i);
+      //ClusterDomains::visibleDomains.push_back(i);
+      //ClusterDomains::visibleDomains.push_back(j);
+      ClusterDomains::visibleDomains.push_back(i);
+      ClusterDomains::visibleDomains.push_back(j);
      }
   }
-  
-  for (int i = 0 ; i < (int)domains.size() ;i++){
-    ClusterDomains::visibleDomains.push_back(i);
+  std::sort(ClusterDomains::visibleDomains.begin(), ClusterDomains::visibleDomains.end());
+  ClusterDomains::visibleDomains.erase(std::unique(ClusterDomains::visibleDomains.begin(), ClusterDomains::visibleDomains.end()), ClusterDomains::visibleDomains.end());
+  for (int i = 0; i < ClusterDomains::ndom; i++){
+    domains[i].makeSet();
   }
+  
+  //for (int i = 0 ; i < (int)domains.size() ;i++){
+  //    ClusterDomains::visibleDomains.push_back(i);
+  //  }
 
 
   //  std::vector<Domain> olddomains = domains; 
   do {
     //    std::vector<std::vector<int>> contacts;    
     for(int i : ClusterDomains::visibleDomains){
-      //      std::sort(domains[i].getContacted().begin(),domains[i].getContacted().end());
+      //std::sort(domains[i].getContacted().begin(),domains[i].getContacted().end());
       for (int j : domains[i].getContacted()){
        	if (j==i){
 	  continue;
