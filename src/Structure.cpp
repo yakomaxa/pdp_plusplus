@@ -38,9 +38,9 @@ Structure::Structure(std::string filename){
 std::vector<Atom> Structure::getRepresentativeAtomArray(){
   std::vector<Atom> Atoms(this->numResidues);
   int index=-1;
+  int resi=0;
   int CA_flag=0;
   int chainid=0;
-  int resi=0;
   int maxindex=0;
   for (gemmi::Model& model : this->structure.models){
     for (gemmi::Chain& chain : model.chains) {
@@ -57,8 +57,9 @@ std::vector<Atom> Structure::getRepresentativeAtomArray(){
 	    resi=stoi(residue.seqid.str());
 	    Atoms[index].setIndexOrg(resi);
 	    Atoms[index].setChainId(chainid);
-	    if (maxindex < resi){
-	      maxindex = resi;
+	    Atoms[index].setResidue(residue.name);
+	    if (maxindex < index){
+	      maxindex = index;
 	    }	      
 	    CA_flag=1;
 	  }

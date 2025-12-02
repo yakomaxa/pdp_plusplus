@@ -8,6 +8,7 @@ class Atom {
 private:
   float x, y, z;
   std::string chain;
+  std::string residue;
   int indexorg;
   int chainid;
     
@@ -23,6 +24,9 @@ public:
   
     void setChain(std::string chain) ;
     std::string getChain() ;
+
+    void setResidue(std::string residue) ;
+    std::string getResidue() ;
 
     void setChainId(int chainid) ;
     int getChainId() ;

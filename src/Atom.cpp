@@ -49,6 +49,14 @@ std::string Atom::getChain(){
     return this->chain;
 } ;
 
+void Atom::setResidue(std::string chain){
+    this->chain = residue;
+};
+
+std::string Atom::getResidue(){
+    return this->residue;
+} ;
+
 void Atom::setChainId(int chainid){
     this->chainid = chainid;
 };
@@ -67,3 +75,4 @@ void Atom::setIndexOrg(int resi){
 int Atom::getIndexOrg(){
     return this->indexorg;
 } ;
+

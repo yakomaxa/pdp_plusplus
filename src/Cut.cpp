@@ -5,7 +5,7 @@
 #include "PDPDistanceMatrix.hpp"
 #include "PDPParameters.hpp"
 
-bool verbose = false;
+bool verbose = true;
 
 int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
              std::vector<std::vector<int>>& dist,
@@ -205,6 +205,10 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 	      
 	    };
 	    contact_density[k]=contacts[k]/max_contacts[k];
+
+	    if(verbose){
+	      printf("%d  %d      %d      %f      %f      %d      %d      %f\n",k,size1,size2,x,y,max_contacts[k],contacts[k],contact_density[k]);
+	    }
 	    
 	    if(from==0){
 	      endsf = PDPParameters::ENDSEND;
@@ -228,19 +232,28 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 	    }
 	  };
 	};
-	if (size0>0){
-	  average_density/=size0;
-	}else{
-	  return -1;	  
+	//	if (size0>0){
+	average_density/=size0;
+	if(verbose){
+	  printf("Trying to cut domain of size %d having %d segments and  average cont_density %f\n",dom.getSize(),dom.getNseg(),average_density);
 	}
+	  //	}else{
+	  //	  return -1;	  
+	  //	}
 	
 	if(val.first_cut) {
 	  val.AD = average_density;
 	};
 	val.AD = average_density;
+
+	if(verbose){
+	  printf("AD=%f\n", average_density);
+	}
 	
 	val.s_min/=val.AD;
-	
+	if(verbose){
+	  printf("after single cut: s_min = %f site_min = %d\n",val.s_min,site_min);
+	}
 	k=0;	
 	nc=0;
 	for(l=0;l<nclose;l++) {
@@ -402,6 +415,11 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 	    max_contacts[k] = 9*x*y;
 	  }
 	  contact_density[nc]=contacts[nc]/max_contacts[nc];
+
+	  if(verbose){
+	    printf(" double cut: %d     %s %d %d c=%d mc=%d x=%f y=%f s1=%d s2=%d cd=%f cd/ad=%f\n",l,ca[iclose[l]].getResidue(),iclose[l],jclose[l],contacts[nc],max_contacts[nc],x,y,size11,size22,contact_density[nc],contact_density[nc]/val.AD);
+	  }
+	  
 	  if((contact_density[nc]/val.AD+PDPParameters::DBL)<val.s_min&&contact_density[nc]/val.AD+PDPParameters::DBL<PDPParameters::CUT_OFF_VALUE2) {
 	    val.s_min = (contact_density[nc]/val.AD)+PDPParameters::DBL;
 	    site_min=iclose[l];
