@@ -1,23 +1,18 @@
 #include "CutDomain.hpp"
 
 bool CutDomain::verbose = true;
-int ndom;
 
 CutDomain::CutDomain(std::vector<Atom> &ca, PDPDistanceMatrix &pdpMatrix, std::vector<int> &init_cutsites){
     this->dist = pdpMatrix.getDist();
     this->ca = ca;
-    this->ndom = 0;
+    this->ndom = 1;
     this->domains = std::vector<Domain>();
     this->init_cutsites = init_cutsites;
 }
 
 void CutDomain::cutDomain(Domain& dom, CutSites& cut_sites,PDPDistanceMatrix& pdpMatrix) {
- 
-    int i, site;
-    
-    Domain dom1;
-    Domain dom2;
-    
+
+    int i, site;       
     CutValues val;
     val.s_min = 100;
     val.site2 = 0;
@@ -26,29 +21,31 @@ void CutDomain::cutDomain(Domain& dom, CutSites& cut_sites,PDPDistanceMatrix& pd
     Cut cut;
     if (init_cutsites.size()<=0){
       printf("CUTTING DE NOVO\n");
-      site = cut.cut(CutDomain::ca, dom, val, CutDomain::dist, pdpMatrix);
+      site = cut.cut(ca, dom, val, dist, pdpMatrix);
     }else{
       printf("CUTTING OF GIVEN\n");
-      site = CutDomain::init_cutsites.back();
-      CutDomain::init_cutsites.pop_back();
+      site = init_cutsites.back();
+      init_cutsites.pop_back();
     }
     printf("site %i \n",site)   ;
     if (site < 0) {
       dom.setScore(val.s_min);
-      CutDomain::domains.push_back(dom);
-      CutDomain::ndom++;
+      domains.push_back(dom);
+      ndom++;
+      std::cout << "HOGE NDOM" << ndom << std::endl;
       return;
     }
-
-    printf("CUT_SITE Ncuts= %i\n",    cut_sites.getNcuts());
+    
     cut_sites.addNcuts(1);
-    printf("CUT_SITE Ncuts= %i\n",    cut_sites.getNcuts());
-    cut_sites.cut_sites[cut_sites.getNcuts()]=site;
-
-    dom1.setSize(0);
+    cut_sites.pushbackCutSites(site);
+    std::cout << "HOGE SITE " << site << std::endl;
+    std::cout << "HOGE SITE2 " << val.site2 << std::endl;    
+    Domain dom1;
     dom1.setNseg(0);
-    dom2.setSize(0);
+    dom1.setSize(0);
+    Domain dom2;
     dom2.setNseg(0);
+    dom2.setSize(0);
     if (val.site2 == 0) {
         for (i = 0; i < dom.getNseg(); i++) {
             if (site > dom.getSegmentAtPos(i).getTo()) {

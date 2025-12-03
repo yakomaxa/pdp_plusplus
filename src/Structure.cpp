@@ -57,7 +57,7 @@ std::vector<Atom> Structure::getRepresentativeAtomArray(){
 	    resi=stoi(residue.seqid.str());
 	    Atoms[index].setIndexOrg(resi);
 	    Atoms[index].setChainId(chainid);
-	    Atoms[index].setResidue(residue.name);
+	    Atoms[index].setResidue(residue.name);	    
 	    if (maxindex < index){
 	      maxindex = index;
 	    }	      

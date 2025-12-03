@@ -49,8 +49,8 @@ std::string Atom::getChain(){
     return this->chain;
 } ;
 
-void Atom::setResidue(std::string chain){
-    this->chain = residue;
+void Atom::setResidue(std::string residue){
+    this->residue = residue;
 };
 
 std::string Atom::getResidue(){

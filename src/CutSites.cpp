@@ -39,6 +39,10 @@ void CutSites::addCutSites(int index, int site){
     this->cut_sites[index] = site;
 };
 
+void CutSites::pushbackCutSites(int site){
+  this->cut_sites.push_back(site);
+};
+
 
 // Setter for cut_sites
 

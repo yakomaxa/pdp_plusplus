@@ -39,6 +39,7 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 
 
         int site_min = -1;
+	val.s_min = 100;
 
 
         // AP add sort here..
@@ -66,48 +67,38 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 	  }
 	  
 	  //printf("---Starting loop4\n");
-
 	  for (int n = 0; n < nclose_raw; n++){
 	    i=iclose_raw[n];
 	    j=jclose_raw[n];
-	    for(jseg=0;jseg<iseg;jseg++) {
-	      from1 = dom.getSegmentAtPos(jseg).getFrom();
-	      to1 = dom.getSegmentAtPos(jseg).getTo();
-	      //printf("----Starting loop5\n");
-	      if(from1<= i && i<to1){
-		//printf("-----Starting loop6\n");
-		for(kseg=iseg+1;kseg<dom.getNseg();kseg++) {
-		  from2 = dom.getSegmentAtPos(kseg).getFrom();
-		  to2 = dom.getSegmentAtPos(kseg).getTo();
-		  //printf("------Starting loop7\n");
-		  if(from2<=j && j<to2){
-		    if(abs(i-j)>4){
-		      contactsd+=(dist[i][j]);
+	    if(abs(i-j)>4){
+	      for(jseg=0;jseg<iseg;jseg++) {
+		from1 = dom.getSegmentAtPos(jseg).getFrom();
+		to1 = dom.getSegmentAtPos(jseg).getTo();
+		if(from1<= i && i<to1){
+		  for(kseg=iseg+1;kseg<dom.getNseg();kseg++) {
+		    from2 = dom.getSegmentAtPos(kseg).getFrom();
+		    to2 = dom.getSegmentAtPos(kseg).getTo();
+		    if(from2<=j && j<to2){
+			contactsd+=(dist[i][j]);
 		    }
 		  }
-		}
+		}else if(from1<= j && j<to1){
+		  for(kseg=iseg+1;kseg<dom.getNseg();kseg++) {
+		    from2 = dom.getSegmentAtPos(kseg).getFrom();
+		    to2 = dom.getSegmentAtPos(kseg).getTo();
+		    if(from2<=i && i<to2){
+			contactsd+=(dist[i][j]);
+		    }
+		  }
+		}	      
 	      }
-
-	      if(from1<= j && j<to1){
-		//printf("-----Starting loop6\n");
-		for(kseg=iseg+1;kseg<dom.getNseg();kseg++) {
-		  from2 = dom.getSegmentAtPos(kseg).getFrom();
-		  to2 = dom.getSegmentAtPos(kseg).getTo();
-		  //printf("------Starting loop7\n");
-		  if(from2<=i && i<to2){
-		    if(abs(i-j)>4){
-		      contactsd+=(dist[i][j]);
-		    }
-		  }
-		}
-	      }	      
 	    }
 	  }
 	  
 	  from = dom.getSegmentAtPos(iseg).getFrom();
 	  to = dom.getSegmentAtPos(iseg).getTo();
 	  //printf("--------Starting loop8\n");
-	  for(k=from;k<to;k++) {
+	  for(int k=from;k<to;k++) {
 	    contacts[k] = contactsd;
 	    size11=size1t+(k-from+1);
 	    size22=size2t+(to-k);
@@ -115,72 +106,48 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 	    for (int n = 0; n < nclose_raw; n++){
 	      i=iclose_raw[n];
 	      j=jclose_raw[n];
-	      if(from<=i && i<=k){
-		//printf("----------Starting loop10\n");
-		for(kseg=iseg+1;kseg<dom.getNseg();kseg++) {
-		  from2 = dom.getSegmentAtPos(kseg).getFrom();
-		  to2 = dom.getSegmentAtPos(kseg).getTo();
-		  //printf("-----------Starting loop11\n");
-		  if(from2<=j && j<=to2){
-		    //printf("------------Starting loop12\n");
-		    if(abs(i-j)>4){
+	      if(abs(i-j)>4){
+		if(from<=i && i<=k){
+		  for(kseg=iseg+1;kseg<dom.getNseg();kseg++) {
+		    from2 = dom.getSegmentAtPos(kseg).getFrom();
+		    to2 = dom.getSegmentAtPos(kseg).getTo();
+		    if(from2<=j && j<=to2){
+		      contacts[k]+=(dist[i][j]);
+		    }
+		  }
+		}else if(from<=j && j<=k){
+		  for(kseg=iseg+1;kseg<dom.getNseg();kseg++) {
+		    from2 = dom.getSegmentAtPos(kseg).getFrom();
+		    to2 = dom.getSegmentAtPos(kseg).getTo();
+		    if(from2<=i && i<=to2){
 		      contacts[k]+=(dist[i][j]);
 		    }
 		  }
 		}
-	      }
-	      
-	      if(from<=j && j<=k){
-		//printf("----------Starting loop10\n");
-		for(kseg=iseg+1;kseg<dom.getNseg();kseg++) {
-		  from2 = dom.getSegmentAtPos(kseg).getFrom();
-		  to2 = dom.getSegmentAtPos(kseg).getTo();
-		  //printf("-----------Starting loop11\n");
-		  if(from2<=i && i<=to2){
-		    //printf("------------Starting loop12\n");
-		    if(abs(i-j)>4){
+		
+		if (from <= i && i <=k ){
+		  if (k+1 <= j && j <=to ){
 		      contacts[k]+=(dist[i][j]);
-		    }
 		  }
-		}
-	      }
-	      
-	      if (from <= i && i <=k ){
-		if (k+1 <= j && j <=to ){
-		  if(abs(i-j)>4){
-		    //printf("------------Starting loop13\n");
+		}else if (from <= j && j <=k ){
+		  if (k+1 <= i && i <=to ){
 		    contacts[k]+=(dist[i][j]);
 		  }
 		}
-	      }
-
-	      if (from <= j && j <=k ){
-		if (k+1 <= i && i <=to ){
-		  if(abs(i-j)>4){
-		    //printf("------------Starting loop13\n");
-		    contacts[k]+=(dist[i][j]);
-		  }
-		}
-	      }
-	      
-	      if ( k+1 <= i  && i<=to) {
-		for(kseg=0;kseg<iseg;kseg++) {
-		  from2 = dom.getSegmentAtPos(kseg).getFrom();
-		  to2 = dom.getSegmentAtPos(kseg).getTo();
-		  if(from2 <= j && j<to2){
-		    if(abs(i-j)>4){
+	      	      
+		if ( k+1 <= i  && i<=to) {
+		  for(kseg=0;kseg<iseg;kseg++) {
+		    from2 = dom.getSegmentAtPos(kseg).getFrom();
+		    to2 = dom.getSegmentAtPos(kseg).getTo();
+		    if(from2 <= j && j<to2){
 		      contacts[k]+=(dist[j][i]);
 		    }
 		  }
-		}
-	      }
-
-	      if ( k+1 <= j  && j<=to) {
-		for(kseg=0;kseg<iseg;kseg++) {
-		  from2 = dom.getSegmentAtPos(kseg).getFrom();
-		  to2 = dom.getSegmentAtPos(kseg).getTo();
-		  if(from2 <= i && i<to2){
-		    if(abs(i-j)>4){
+		}else if ( k+1 <= j  && j<=to) {
+		  for(kseg=0;kseg<iseg;kseg++) {
+		    from2 = dom.getSegmentAtPos(kseg).getFrom();
+		    to2 = dom.getSegmentAtPos(kseg).getTo();
+		    if(from2 <= i && i<to2){
 		      contacts[k]+=(dist[j][i]);
 		    }
 		  }
@@ -205,7 +172,7 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 	      
 	    };
 	    contact_density[k]=contacts[k]/max_contacts[k];
-
+	    
 	    if(verbose){
 	      printf("%d  %d      %d      %f      %f      %d      %d      %f\n",k,size1,size2,x,y,max_contacts[k],contacts[k],contact_density[k]);
 	    }
@@ -230,16 +197,16 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 	      average_density+=contact_density[k];
 	      size0++;
 	    }
-	  };
-	};
+	  }
+	}
 	//	if (size0>0){
 	average_density/=size0;
 	if(verbose){
 	  printf("Trying to cut domain of size %d having %d segments and  average cont_density %f\n",dom.getSize(),dom.getNseg(),average_density);
 	}
-	  //	}else{
-	  //	  return -1;	  
-	  //	}
+	//	}else{
+	//	  return -1;	  
+	//	}
 	
 	if(val.first_cut) {
 	  val.AD = average_density;
@@ -254,7 +221,7 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 	if(verbose){
 	  printf("after single cut: s_min = %f site_min = %d\n",val.s_min,site_min);
 	}
-	k=0;	
+
 	nc=0;
 	for(l=0;l<nclose;l++) {
 	  /************ find iseg, jseg ****************/
@@ -280,7 +247,10 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 	      jseg=kseg;
 	    }
 	  }
-	  if(iseg<0||jseg<0) continue;
+	  
+	  if(iseg<0||jseg<0){
+	    continue;
+	  }
 	  /*********************************************/
 	  
 	  from=dom.getSegmentAtPos(iseg).getFrom();
@@ -426,10 +396,13 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 	    val.site2=jclose[l];
 	  }
 	  nc++;
-	  if ( nc >= PDPParameters::MAXSIZE)
-	    nc = PDPParameters::MAXSIZE-1;
+	  //if ( nc >= PDPParameters::MAXSIZE)
+	  //	    nc = PDPParameters::MAXSIZE-1;
 	}
 	val.first_cut=false;
+	if(verbose){
+	  printf("at the end of cut: s_min %f CUTOFF %f site_min %d *site2 %d\n",val.s_min,PDPParameters::CUT_OFF_VALUE,site_min,val.site2);
+	}
 	if(val.s_min> PDPParameters::CUT_OFF_VALUE){
 	  return -1;
 	}
