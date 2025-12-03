@@ -19,9 +19,10 @@ public:
   std::string toString();
   int getNcuts();
   void setNcuts(int ncuts);
-  void addNcuts(int add);   
+  void addNcuts(int add); 
   std::vector<int> getCutSites();
   void setCutSites(std::vector<int> cut_sites);
+  void pushbackCutSites(int site);
   void addCutSites(int index, int site);
   
 };

@@ -20,15 +20,13 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 	std::vector<int> iclose_raw = pdpMatrix.getIclose_raw();
         std::vector<int> jclose_raw = pdpMatrix.getJclose_raw();
 
-	
-        std::vector<int> contacts(PDPParameters::MAXLEN+1);
-        std::vector<double> max_contacts(PDPParameters::MAXLEN+1);
-        std::vector<double> contact_density(PDPParameters::MAXLEN+1);
+        std::vector<int> contacts(nclose_raw);
+        std::vector<double> max_contacts(nclose_raw);
+        std::vector<double> contact_density(nclose_raw);
         double average_density,x,y;
 
         int endsf,endst;
         int nc;
-        nc=0;
         int size1,size2;
         int size1t,size2t;
         int size11,size22,size0;
@@ -38,7 +36,6 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 
         int site_min = -1;
 	val.s_min = 100;
-
 
         // AP add sort here..
         // qsort(dom.segment,dom.getNseg(),sizeof(struct Segment),segcmp);
@@ -221,7 +218,7 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 	}
 
 	nc=0;
-	for(int l=0;l<nclose;l++) {
+	for(int l=0;l<nclose_raw;l++) {
 	  /************ find iseg, jseg ****************/
 	  int iseg=-1;
 	  int jseg=-1;
@@ -395,6 +392,7 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 	    val.site2=jclose[l];
 	  }
 	  nc++;
+	  std::cout << "NC++" << nc << std::endl;
 	  //if ( nc >= PDPParameters::MAXSIZE)
 	  //	    nc = PDPParameters::MAXSIZE-1;
 	}

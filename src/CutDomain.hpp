@@ -20,7 +20,6 @@ private:
   std::vector<int> init_cutsites;
   
 public:
-  static bool verbose;
   CutDomain(std::vector<Atom>& ca, PDPDistanceMatrix& pdpMatrix,std::vector<int>& init_cutsites);
   void cutDomain(Domain& dom,
 		 CutSites& cut_sites,PDPDistanceMatrix& pdpMatrix);
