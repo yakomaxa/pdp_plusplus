@@ -9,11 +9,11 @@
 #include "CutDomain.hpp"
 #include "PDPParameters.hpp"
 
-static bool verbose = CutDomain::verbose;
-int ClusterDomains::ndom;
+
 std::vector<int> ClusterDomains::visibleDomains;
+int ClusterDomains::ndom;
 ClusterDomains::ClusterDomains(){
-    
+
 }
 
 static void listdomains(std::vector<Domain>& domains) {
@@ -97,6 +97,7 @@ int ClusterDomains::isContacting(Domain& i,Domain& j,const std::vector<int>& icl
 };
     
 std::vector<Domain> combine(std::vector<Domain> &domains, int Si, int Sj, double maximum_value, std::vector<std::vector<int>> &contacts) {
+  bool verbose = true;
   if (verbose){
         std::cout << "  +++  combining domains " << Si << " " << Sj << "\n";
   }
@@ -132,7 +133,7 @@ std::vector<Domain> combine(std::vector<Domain> &domains, int Si, int Sj, double
 std::vector<Domain> ClusterDomains::cluster(
                             std::vector<Domain>& domains,
                             PDPDistanceMatrix& pdpDistMatrix){
-    
+  bool verbose = true;
   ClusterDomains::ndom = (int)domains.size();
   int Si = -1;
   int Sj = -1;
