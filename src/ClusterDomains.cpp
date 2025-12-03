@@ -110,7 +110,7 @@ std::vector<Domain> combine(std::vector<Domain> &domains, int Si, int Sj, double
   std::erase(ClusterDomains::visibleDomains,Sj);
   
   for (int k : domains[Sj].getContacted()){
-    //domains[Si].removeContacted(k);
+    domains[Si].removeContacted(k);
     domains[Si].pushbackContacted(k);
     domains[k].removeContacted(Si);
     domains[k].pushbackContacted(Si);
@@ -166,9 +166,9 @@ std::vector<Domain> ClusterDomains::cluster(
   std::vector<int> iclose_raw = pdpDistMatrix.getIclose_raw();
   std::vector<int> jclose_raw = pdpDistMatrix.getJclose_raw();
 
-  for(int i=0;i<ClusterDomains::ndom-1;i++) {
+  for(int i=0;i<ClusterDomains::ndom;i++) {
     d1 = domains.at(i);
-    for(int j=i+1;j<ClusterDomains::ndom;j++) {
+    for(int j=i ;j<ClusterDomains::ndom;j++) {
       d2 = domains.at(j);
       if (ClusterDomains::isContacting(d1,d2,iclose_raw,jclose_raw,nclose_raw)){
 	i_can_contact[n_can]=i;

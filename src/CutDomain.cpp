@@ -3,7 +3,7 @@
 CutDomain::CutDomain(std::vector<Atom> &ca, PDPDistanceMatrix &pdpMatrix, std::vector<int> &init_cutsites){
     this->dist = pdpMatrix.getDist();
     this->ca = ca;
-    this->ndom = 0;
+    this->ndom = 1;
     this->domains = std::vector<Domain>();
     this->init_cutsites = init_cutsites;
 }
