@@ -22,6 +22,8 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 
   std::vector<int> contacts(nclose_raw);
   std::vector<int> max_contacts(nclose_raw);
+  // (K.S. 2025-Dec-06) I used to define this max_contacts as vector<double>, which caused slight but persistent inconsistency from the original because of floating point in 10*x*y or 9*x*y to be injected into max_contacts[nc]. Now it's made int, and 10*x*y and 9*x*y are explicitly cast to int as (int)(10*x*y), realizing perfect consistency to the original PDP.
+
   std::vector<double> contact_density(nclose_raw);
   double average_density,x,y;
   
@@ -168,9 +170,9 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
       x=std::min(pow(x,1.3/3)+PDPParameters::RG,pow(x,1.1/3)+pow(PDPParameters::TD,1.3/3)+PDPParameters::RG);
       y=std::min(pow(y,1.3/3)+PDPParameters::RG,pow(y,1.1/3)+pow(PDPParameters::TD,1.3/3)+PDPParameters::RG);
       
-      max_contacts[k] = 10*x*y;
+      max_contacts[k] = (int)(10*x*y);
       if(size1>150){
-	max_contacts[k] = 9*x*y;
+	max_contacts[k] = (int)(9*x*y);
 	
       };
       contact_density[k]=(double)contacts[k]/(double)max_contacts[k];
@@ -401,12 +403,11 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
     x=std::min(pow(x,1.3/3)+PDPParameters::RG,pow(x,1.1/3)+pow(PDPParameters::TD,1.3/3)+PDPParameters::RG);
     y=std::min(pow(y,1.3/3)+PDPParameters::RG,pow(y,1.1/3)+pow(PDPParameters::TD,1.3/3)+PDPParameters::RG);
     
-    max_contacts[nc] = x*y*10;
+    max_contacts[nc] = (int)(x*y*10);
     if(size1>150){
-      max_contacts[nc] = 9*x*y;
-      printf("WOOOOOOOOOOOOOOOOOOOO\n");
+      max_contacts[nc] = (int)(9*x*y); // the original code seems to have wrong index max_contacts[k] instead of [nc] here. 
     }
-    contact_density[nc]=(double)contacts[nc]/(double)max_contacts[nc];
+    contact_density[nc]=(double)contacts[nc]/(double)max_contacts[nc]; 
     
     if(verbose){
       std::cout << max_contacts[nc] << std::endl;
