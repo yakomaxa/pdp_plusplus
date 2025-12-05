@@ -22,7 +22,7 @@ private:
 public:
   CutDomain(std::vector<Atom>& ca, PDPDistanceMatrix& pdpMatrix,std::vector<int>& init_cutsites);
   void cutDomain(Domain& dom,
-		 CutSites& cut_sites,PDPDistanceMatrix& pdpMatrix);
+		 CutSites& cut_sites,PDPDistanceMatrix& pdpMatrix, CutValues& val);
   std::vector<Domain> getDomains();
   
 };
