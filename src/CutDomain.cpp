@@ -1,20 +1,16 @@
 #include "CutDomain.hpp"
-
+bool verbose_cut = true;
 CutDomain::CutDomain(std::vector<Atom> &ca, PDPDistanceMatrix &pdpMatrix, std::vector<int> &init_cutsites){
     this->dist = pdpMatrix.getDist();
     this->ca = ca;
-    this->ndom = 1;
+    this->ndom = 0;
     this->domains = std::vector<Domain>();
     this->init_cutsites = init_cutsites;
 }
 
-void CutDomain::cutDomain(Domain& dom, CutSites& cut_sites,PDPDistanceMatrix& pdpMatrix) {
-  int site;
-  CutValues val;
-  val.s_min = 100;
+void CutDomain::cutDomain(Domain& dom, CutSites& cut_sites,PDPDistanceMatrix& pdpMatrix, CutValues& val) {
+  int site = -1;
   val.site2 = 0;
-  val.first_cut = true;
-
   if (init_cutsites.size()<=0){
       printf("CUTTING DE NOVO\n");
       Cut cut;
@@ -119,22 +115,18 @@ void CutDomain::cutDomain(Domain& dom, CutSites& cut_sites,PDPDistanceMatrix& pd
       }
     }
 
-    /**
-    if(verbose){
-      std::cout << "  CUTR dom1 ...  nse" << dom1.getNseg() << 
-;
+    if(verbose_cut){
+      printf("cutr dom1: nseg %d\n",dom1.getNseg());
     }
 
-    if ( verbose){
-      for(i=0;i<dom1.getNseg();i++){
-	std::cout << "F ... from %d to %d" << dom1.getSegmentAtPos(i).getFrom() << " "
-		  << dom1.getSegmentAtPos(i).getTo() << 
-;
+    if ( verbose_cut){
+      for(int iv=0;iv<dom1.getNseg();iv++){
+	printf("cutr dom1 from %d to %d\n",dom1.getSegmentAtPos(iv).getFrom(),dom1.getSegmentAtPos(iv).getTo());
       }
     }
-    **/
+
     
-    cutDomain(dom1, cut_sites, pdpMatrix);
+    cutDomain(dom1, cut_sites, pdpMatrix, val);
 
     /**
     if(verbose){
@@ -151,7 +143,19 @@ void CutDomain::cutDomain(Domain& dom, CutSites& cut_sites,PDPDistanceMatrix& pd
     }
     **/
 
-    cutDomain(dom2, cut_sites, pdpMatrix);
+    if(verbose_cut){
+      printf("cutr dom2: nseg %d\n",dom2.getNseg());
+    }
+    
+    if (verbose_cut){
+      for(int iv=0;iv<dom2.getNseg();iv++){
+        printf("cutr dom2 from %d to %d\n",dom2.getSegmentAtPos(iv).getFrom(),dom2.getSegmentAtPos(iv).getTo());
+      }
+    }
+
+
+
+    cutDomain(dom2, cut_sites, pdpMatrix, val);
 
 };
 

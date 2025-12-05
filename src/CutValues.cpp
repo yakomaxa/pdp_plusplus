@@ -1,6 +1,6 @@
 #include "CutValues.hpp"
 
-CutValues::CutValues() : s_min(100), site2(0), first_cut(true) {}
+CutValues::CutValues() : s_min(100), site2(0), first_cut(true), AD(0) {}
 
 CutValues::~CutValues() {}
 

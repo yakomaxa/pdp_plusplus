@@ -101,8 +101,9 @@ int main(int argc, char *argv[]){
     printf("ADDING INITAIAL SITE%i\n",i);
     init_cutsites.push_back(i+1);
   }
+  CutValues val;
   CutDomain cutDomain(ca,pdpMatrix, init_cutsites);
-  cutDomain.cutDomain(dom, cutSites,pdpMatrix);
+  cutDomain.cutDomain(dom, cutSites,pdpMatrix, val);
   printf("---------Initial splitting done\n");    
   domains =  cutDomain.getDomains();  
   // Cluster domains
