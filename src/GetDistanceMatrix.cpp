@@ -109,6 +109,7 @@ PDPDistanceMatrix GetDistanceMatrix::getDistanceMatrix(std::vector<Atom>& protei
     }
   }
 
+  // K.S. I think this part needs better range check or we need to verify current does not touch indexes out of range... 2025-Dec-06.
   for(int i=1;i<(int)protein.size();i++) {
     for(int j=i;j<(int)protein.size()-1;j++) {	
       if(dist[i][j]>=2&&j-i>5) {

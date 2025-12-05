@@ -9,6 +9,10 @@
 #include "CutDomain.hpp"
 #include "PDPParameters.hpp"
 
+// K.S. 2025-Dec-06:
+// compare the result of original PDP and PDP++ for AF-P14775-F1-model_v6.pdb
+// the former returns 1–96, but the latter does not return anything, removing all the small fragments
+// This clustering part of PDP++ might need debugging, or the original PDP is flawed; if the original is executed with -v, it shows many super large double (float) for the variable named avd, which suggests merging is superficial and misled by these weird scores: I think the insanely large value is something from NaN or overflow. But it's float, so it causes mis-scoring!
 
 std::vector<int> ClusterDomains::visibleDomains;
 int ClusterDomains::ndom;
