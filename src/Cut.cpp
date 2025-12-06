@@ -203,17 +203,21 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
       }
     }
   }
-  if (size0>0){ // K.S.: Added this to avoid 0-division.
+  if (!size0==0){ // K.S.: Added this to avoid 0-division.
     average_density/=size0;
     if(verbose){
       printf("Trying to cut domain of size %d having %d segments and  average cont_density %f\n",dom.getSize(),dom.getNseg(),average_density);
-      for(int kseg=0;kseg<dom.getNseg();kseg++) {
+      for(int kseg=0;kseg<dom.getNseg();kseg++){
 	//to=dom.getSegmentAtPos(iseg).getTo();
 	printf("Trying segment %d from %d to %d\n",kseg,dom.getSegmentAtPos(kseg).getFrom(),dom.getSegmentAtPos(kseg).getTo());
       }
     }
-    }else{
+  }else{
     val.AD = 123456;
+    if(verbose){
+      printf("could have had NaN because size0 == 0, forced to exit!");
+      printf("at the end of cut: s_min %f CUTOFF %f site_min %d *site2 %d\n",val.s_min,PDPParameters::CUT_OFF_VALUE,site_min,val.site2);
+    }
     return -1;
   }
     
@@ -226,10 +230,14 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
     printf("AD=%f\n", average_density);
   }
 
-  if (val.AD > 0){ // K.S.: Added this to avoid 0-division.
+  if (!val.AD == 0){ // K.S.: Added this to avoid 0-division.
     val.s_min/=val.AD;
   }else{
-    val.s_min = PDPParameters::CUT_OFF_VALUE + 1.0; // Forced to accept "if(val.s_min > PDPParameters::CUT_OFF_VALUE){" line;
+    if(verbose){
+      printf("could have had NaN because val.AD  == 0, forced to exit!");
+      printf("at the end of cut: s_min %f CUTOFF %f site_min %d *site2 %d\n",val.s_min,PDPParameters::CUT_OFF_VALUE,site_min,val.site2);
+    }
+    return -1;
   }
   
   if(verbose){
