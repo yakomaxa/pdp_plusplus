@@ -20,6 +20,7 @@ const float PDPParameters::CUT_OFF_VALUE1 = .29f;
 const float PDPParameters::CUT_OFF_VALUE2 = .44f;
 const float PDPParameters::CUT_OFF_VALUE1S = .19f;
 const float PDPParameters::CUT_OFF_VALUE1M = .21f;
+bool PDPParameters::VERBOSE = false;
 
 void PDPParameters::setMAXLEN(int MAXLEN){
   this->MAXLEN = MAXLEN;

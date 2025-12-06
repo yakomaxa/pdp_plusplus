@@ -65,25 +65,54 @@ static void listdomains(std::vector<Domain>& domains, const std::string& filenam
 
 int main(int argc, char *argv[]){
   std::string filename=argv[1];
-  printf("---------Reading structure\n");
+
+  PDPParameters::VERBOSE=false;
+  if (argc == 3) {
+      std::string ch=argv[2];
+      if (ch == "-v"){
+	PDPParameters::VERBOSE=true;
+      }
+  }
+  if (argc == 4){
+    std::string verbose=argv[3];
+    if (verbose == "-v"){
+      PDPParameters::VERBOSE=true;
+    }
+  }
+  
+  if (PDPParameters::VERBOSE){
+    printf("---------Reading structure\n");
+  }
   Structure s = Structure(filename);
-  printf("---------Reading structure Done\n");
+  if (PDPParameters::VERBOSE){
+    printf("---------Reading structure Done\n");
+  }
   std::vector<Domain> domains;
   PDPParameters param;
   param.setMAXLEN(s.numResidues);
-  printf("---------Get Repr atoms\n");
+  if (PDPParameters::VERBOSE){
+    printf("---------Get Repr atoms\n");
+  }
   std::vector<Atom> ca = s.getRepresentativeAtomArray();
-  printf("---------Get Repr atoms Done\n");
+  if (PDPParameters::VERBOSE){
+    printf("---------Get Repr atoms Done\n");
+  }
   GetDistanceMatrix distMtxCalculator;
-  
-  printf("---------distMat creation\n");
+
+  if (PDPParameters::VERBOSE){
+    printf("---------distMat creation\n");
+  }
   PDPDistanceMatrix pdpMatrix = distMtxCalculator.getDistanceMatrix(ca);
-  printf("---------distMat creation Done\n");
+  if (PDPParameters::VERBOSE){
+    printf("---------distMat creation Done\n");
+  }
 
   Domain dom;
   //Chain c = ca[0].getGroup().getChain();
   //dom.setId("D"+c.getStructure().getPDBCode()+c.getId()+"1");
-  printf("---------Setting domain info\n");
+  if (PDPParameters::VERBOSE){
+    printf("---------Setting domain info\n");
+  }
   dom.setId("testDomain");
   dom.setSize((int)ca.size());
   dom.setNseg(1);
@@ -91,25 +120,37 @@ int main(int argc, char *argv[]){
   dom.getSegmentAtPos(0).setFrom(0);
   dom.getSegmentAtPos(0).setTo(int(ca.size())-1);
   CutSites cutSites = CutSites();
-  printf("---------Setting domain info done\n");  
+  if (PDPParameters::VERBOSE){
+    printf("---------Setting domain info done\n");
+    printf("---------Initial splitting\n");
+  }
   // Do the initial splitting
-  printf("---------Initial splitting\n");
+  
+
   std::vector<int> init_cutsites;
   // add the head residue of the chains except for the first one
   s.tailofchain.pop_back();;
   for (int i : s.tailofchain){
-    printf("ADDING INITAIAL SITE%i\n",i);
+    if (PDPParameters::VERBOSE){
+      printf("ADDING INITAIAL SITE%i\n",i);
+    }
     init_cutsites.push_back(i+1);
   }
   CutValues val;
   CutDomain cutDomain(ca,pdpMatrix, init_cutsites);
   cutDomain.cutDomain(dom, cutSites,pdpMatrix, val);
-  printf("---------Initial splitting done\n");    
+  if (PDPParameters::VERBOSE){
+    printf("---------Initial splitting done\n");
+  }
   domains =  cutDomain.getDomains();  
   // Cluster domains
-  printf("---------Clustering domains\n");
+  if (PDPParameters::VERBOSE){
+    printf("---------Clustering domains\n");
+  }
   domains = ClusterDomains::cluster(domains, pdpMatrix);
-  printf("---------Clustering domains Done\n");  
+  if (PDPParameters::VERBOSE){
+    printf("---------Clustering domains Done\n");
+  }
 
   for (int i= 0 ; i < (int)domains.size(); i++){
     for (int j = 0 ; j < domains[i].getNseg();j++){
@@ -134,7 +175,9 @@ int main(int argc, char *argv[]){
        	domains[j].getSegmentAtPos(i).setToOrg(domains[j].getSegmentAtPos(i+1).getToOrg());
 	domains[j].getSegmentAtPos(i).setTo(domains[j].getSegmentAtPos(i+1).getTo());
 	domains[j].addNseg(-1);
-	printf("NSEG=%i\n",domains[j].getNseg());
+	if (PDPParameters::VERBOSE){
+	  printf("NSEG=%i\n",domains[j].getNseg());
+	}
 	for(int l=i+1;l<domains[j].getNseg();l++){
 	  domains[j].getSegmentAtPos(l).setToOrg(domains[j].getSegmentAtPos(l+1).getToOrg());
 	  domains[j].getSegmentAtPos(l).setTo(domains[j].getSegmentAtPos(l+1).getTo());	  
@@ -142,21 +185,31 @@ int main(int argc, char *argv[]){
 	  domains[j].getSegmentAtPos(l).setFrom(domains[j].getSegmentAtPos(l+1).getFrom());
 	  domains[j].getSegmentAtPos(l).setChain(domains[j].getSegmentAtPos(l+1).getChain());
 	}
-	printf("%i\n",i);
+	if (PDPParameters::VERBOSE){
+	  printf("%i\n",i);
+	}
 	i--;
       }
     }
   }
 
-  
-  listdomains(domains);
+
+  if (PDPParameters::VERBOSE){
+    listdomains(domains);
+  }
   listdomains(domains,"naive.pml"); //should allow user to specify file name
   // Remove short segments
-  printf("---------Cleanup \n");  
+  if (PDPParameters::VERBOSE){
+    printf("---------Cleanup \n");
+  }
   ShortSegmentRemover::cleanup(domains);
-  printf("---------Cleanup Done\n");  
-  printf("FINAL!!\n");
-  listdomains(domains);
+  if (PDPParameters::VERBOSE){
+    printf("---------Cleanup Done\n");  
+    printf("FINAL!!\n");
+  }
+  if (PDPParameters::VERBOSE){
+    listdomains(domains);
+  }  
   listdomains(domains,"removed.pml"); //should allow user to specify file name
 
   // PDB file exporter should be here

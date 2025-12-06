@@ -5,7 +5,7 @@
 #include "PDPDistanceMatrix.hpp"
 #include "PDPParameters.hpp"
 
-bool verbose = true;
+bool verbose = PDPParameters::VERBOSE;;
 int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
              std::vector<std::vector<int>>& dist,
              PDPDistanceMatrix& pdpMatrix){
@@ -441,7 +441,9 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
       val.site2=jclose[l];
     }
     nc++;
-    std::cout << "NC++" << nc << std::endl;
+    if (verbose){
+      std::cout << "NC++" << nc << std::endl;
+    }
     //if ( nc >= PDPParameters::MAXSIZE)
     //	    nc = PDPParameters::MAXSIZE-1;
   }

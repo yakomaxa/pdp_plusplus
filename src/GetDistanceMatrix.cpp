@@ -36,10 +36,14 @@ PDPDistanceMatrix GetDistanceMatrix::getDistanceMatrix(std::vector<Atom>& protei
   float d,dt1,dt2,dt3,dt4;
   int nc=0;  
 
-  std::cerr << protein.size() << " protein.len < MAXLEN " << PDPParameters::MAXLEN << "\n";
-  if((int)protein.size() >= PDPParameters::MAXLEN) {
-    std::cerr << protein.size() << " protein.len > MAXLEN " << PDPParameters::MAXLEN << "\n";
+  if (PDPParameters::VERBOSE){
+    std::cerr << protein.size() << " protein.len < MAXLEN " << PDPParameters::MAXLEN << "\n";
+    if((int)protein.size() >= PDPParameters::MAXLEN) {
+      std::cerr << protein.size() << " protein.len > MAXLEN " << PDPParameters::MAXLEN << "\n";
+
+    }
   }
+  
   dt1=81;
   dt2=64;
   dt3=49;
@@ -116,13 +120,17 @@ PDPDistanceMatrix GetDistanceMatrix::getDistanceMatrix(std::vector<Atom>& protei
 	if((dist[i-1][j-1]>=2&&dist[i+1][j+1]>=2)||(dist[i-1][j+1]>=2&&dist [i+1][j-1]>=2))  {
 	  dist[i][j]+=4;
 	  dist[j][i]+=4;
-		    printf("COND1: %d %d %d\n",i,j,dist[i][j]);
+	  if (PDPParameters::VERBOSE){
+	    printf("COND1: %d %d %d\n",i,j,dist[i][j]);
+	  }
 	}
 	else if(i>2&&j<(int)protein.size()-2) {
 	  if((dist[i-3][j-3]>=1&&dist[i+3][j+3]>=1)||(dist[i-3][j+3]>=1&&dist[i+3][j-3]>=1)) {
 	    dist[i][j]+=4;
 	    dist[j][i]+=4;
-	    printf("COND3: %d %d %d\n",i,j,dist[i][j]);
+	    if (PDPParameters::VERBOSE){
+	      printf("COND3: %d %d %d\n",i,j,dist[i][j]);
+	    }
 	  }
 	  else if(i>3&&j<(int)protein.size()-3) {
 	    if(((dist[i-3][j-3]>=1||dist[i-3][j-4]>=1||dist[i-4][j-3]>=1||dist[i-4][j-4]>=1)&&
@@ -131,7 +139,9 @@ PDPDistanceMatrix GetDistanceMatrix::getDistanceMatrix(std::vector<Atom>& protei
 		  (dist[i+4][j-4]>=1||dist[i+4][j-3]>=1||dist[i+3][j-4]>=1||dist[i+3][j-3]>=1))) {
 	      dist[i][j]+=4;
 	      dist[j][i]+=4;
-	      printf("COND4: %d %d %d\n",i,j,dist[i][j]);
+	      if (PDPParameters::VERBOSE){
+		printf("COND4: %d %d %d\n",i,j,dist[i][j]);
+	      }
 	    }	     
 	  }
 	}

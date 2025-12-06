@@ -1,5 +1,5 @@
 #include "CutDomain.hpp"
-bool verbose_cut = true;
+bool verbose_cut = PDPParameters::VERBOSE;;
 CutDomain::CutDomain(std::vector<Atom> &ca, PDPDistanceMatrix &pdpMatrix, std::vector<int> &init_cutsites){
     this->dist = pdpMatrix.getDist();
     this->ca = ca;
@@ -12,27 +12,39 @@ void CutDomain::cutDomain(Domain& dom, CutSites& cut_sites,PDPDistanceMatrix& pd
   int site = -1;
   val.site2 = 0;
   if (init_cutsites.size()<=0){
+    if (verbose_cut){
       printf("CUTTING DE NOVO\n");
-      Cut cut;
-      site = cut.cut(ca, dom, val, dist, pdpMatrix);
-    }else{
+    }
+    Cut cut;
+    site = cut.cut(ca, dom, val, dist, pdpMatrix);
+  }else{
+    if (verbose_cut){
       printf("CUTTING OF GIVEN\n");
-      site = init_cutsites.back();
-      init_cutsites.pop_back();
     }
+    site = init_cutsites.back();
+    init_cutsites.pop_back();
+  }
+
+  if (verbose_cut){
     printf("site %i \n",site)   ;
-    if (site < 0) {
-      dom.setScore(val.s_min);
-      domains.push_back(dom);
-      ndom++;
+  }
+  
+  if (site < 0) {
+    dom.setScore(val.s_min);
+    domains.push_back(dom);
+    ndom++;
+    if (verbose_cut){
       std::cout << "HOGE NDOM" << ndom << std::endl;
-      return;
     }
+    return;
+  }
     
     cut_sites.addNcuts(1);
     cut_sites.pushbackCutSites(site);
-    std::cout << "HOGE SITE " << site << std::endl;
-    std::cout << "HOGE SITE2 " << val.site2 << std::endl;    
+    if (verbose_cut){
+      std::cout << "HOGE SITE " << site << std::endl;
+      std::cout << "HOGE SITE2 " << val.site2 << std::endl;
+    }
     Domain dom1;
     dom1.setNseg(0);
     dom1.setSize(0);

@@ -14,6 +14,8 @@
 // the former returns 1–96, but the latter does not return anything, removing all the small fragments
 // This clustering part of PDP++ might need debugging, or the original PDP is flawed; if the original is executed with -v, it shows many super large double (float) for the variable named avd, which suggests merging is superficial and misled by these weird scores: I think the insanely large value is something from NaN or overflow. But it's float, so it causes mis-scoring!
 
+bool verbose_cluster = PDPParameters::VERBOSE;
+
 std::vector<int> ClusterDomains::visibleDomains;
 int ClusterDomains::ndom;
 ClusterDomains::ClusterDomains(){
@@ -90,7 +92,7 @@ int ClusterDomains::isContacting(Domain& i,Domain& j,const std::vector<int>& icl
 	  return true;
 	}
 	if (fromi <= jclose[n] && toi >= jclose[n] &&
-	    fromj <= iclose[n] && toj >= iclose[n] 
+	    fromj <= iclose[n] && toj >= iclose[n]
 	    ){
 	  return true;
 	}
@@ -101,8 +103,7 @@ int ClusterDomains::isContacting(Domain& i,Domain& j,const std::vector<int>& icl
 };
     
 std::vector<Domain> combine(std::vector<Domain> &domains, int Si, int Sj, double maximum_value, std::vector<std::vector<int>> &contacts) {
-  bool verbose = true;
-  if (verbose){
+  if (verbose_cluster){
         std::cout << "  +++  combining domains " << Si << " " << Sj << "\n";
   }
   for (int i = 0; i < domains[Sj].getNseg(); i++) {
@@ -137,7 +138,6 @@ std::vector<Domain> combine(std::vector<Domain> &domains, int Si, int Sj, double
 std::vector<Domain> ClusterDomains::cluster(
                             std::vector<Domain>& domains,
                             PDPDistanceMatrix& pdpDistMatrix){
-  bool verbose = true;
   ClusterDomains::ndom = (int)domains.size();
   int Si = -1;
   int Sj = -1;
@@ -185,7 +185,7 @@ std::vector<Domain> ClusterDomains::cluster(
 
   std::vector<std::vector<int>> contacts_list((ClusterDomains::ndom), std::vector<int>(ClusterDomains::ndom));
   std::vector<std::vector<int>> dist = pdpDistMatrix.getDist();
-  int tmp=0;
+  //int tmp=0;
   int total_contacts = 0;
   for(int n = 0 ; n < n_can; n++) {
     total_contacts = 0 ;
@@ -214,8 +214,11 @@ std::vector<Domain> ClusterDomains::cluster(
 	}
       }
     }
-        
-    std::cout << " pos: d1:" << i << " vs d2:" << j << " d1:" << d1.getSegmentAtPos(0).getFrom() << "-" << d1.getSegmentAtPos(0).getTo() << " " <<  d2.getSegmentAtPos(0).getFrom() << "-" << d2.getSegmentAtPos(0).getTo() << " " << total_contacts << "\n" ;
+
+    if (verbose_cluster){
+      std::cout << " pos: d1:" << i << " vs d2:" << j << " d1:" << d1.getSegmentAtPos(0).getFrom() << "-" << d1.getSegmentAtPos(0).getTo() << " " <<  d2.getSegmentAtPos(0).getFrom() << "-" << d2.getSegmentAtPos(0).getTo() << " " << total_contacts << "\n" ;
+    }
+    
     contacts_list[i][j]=contacts_list[j][i]=total_contacts;
      if (total_contacts > 0){
       domains[i].pushbackContacted(j);
@@ -259,7 +262,7 @@ std::vector<Domain> ClusterDomains::cluster(
 	
 	double S_value= double(total_contacts)/(double)total_max_contacts;
 		
-      if(verbose) {
+      if(verbose_cluster) {
 	printf("size1=%i size2=%i minDomSize=%f maxDomSize=%f total_contacts = %i \n", size1,size2,minDomSize,maxDomSize,total_contacts);
 	printf(" total_contacts = %i total_max_contacts = %i\n", total_contacts, total_max_contacts);
 	printf(" maximum_value = %f S_value = %f\n",maximum_value, S_value);

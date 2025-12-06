@@ -36,10 +36,14 @@ bool Segment::operator<(const Segment& other) const {
   int tmp1 = chainid_ * PDPParameters::maxIndex * 10;
   int tmp2 = other.chainid_ * PDPParameters::maxIndex * 10;
   if ( from_ + tmp1 != other.from_ + tmp2 ) {
-    printf("A = %i, B = %i\n", from_ + tmp1,other.from_ + tmp2);
+    if (PDPParameters::VERBOSE){
+      printf("A = %i, B = %i\n", from_ + tmp1,other.from_ + tmp2);
+    }
     return (from_ + tmp1) < (other.from_ + tmp2);
   }
-  printf("A = %i, B = %i\n", to_ + tmp1, other.to_ + tmp2);
+  if (PDPParameters::VERBOSE){
+    printf("A = %i, B = %i\n", to_ + tmp1, other.to_ + tmp2);
+  }
   return (to_ + tmp1) < (other.to_ + tmp2);
 }
 bool Segment::operator>(const Segment& other) const { return other < *this; }
