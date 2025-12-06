@@ -195,10 +195,10 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 	endst = PDPParameters::ENDS;
       };
       
-      if((contact_density[k])<val.s_min && k > from + endsf && k< to - endst) {
-	val.s_min = (contact_density[k]);
-	site_min=k+1;
-      }
+      //      if((contact_density[k])<val.s_min && k > from + endsf && k< to - endst) {
+      //	val.s_min = (contact_density[k]);
+      //	site_min=k+1;
+      //      }
       if(k>from+endsf&&k<to-endst) {
 	if((contact_density[k])<val.s_min){
 	  val.s_min = (contact_density[k]);
