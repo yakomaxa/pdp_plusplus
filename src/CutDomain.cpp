@@ -40,7 +40,7 @@ void CutDomain::cutDomain(Domain& dom, CutSites& cut_sites,PDPDistanceMatrix& pd
     Domain dom2;
     dom2.setNseg(0);
     dom2.setSize(0);
-    if (val.site2 == 0) {
+    if (val.site2 == 0) { 
         for (int i = 0; i < dom.getNseg(); i++) {
             if (site > dom.getSegmentAtPos(i).getTo()) {
                 dom1.getSegmentAtPos(dom1.getNseg()).setTo(dom.getSegmentAtPos(i).getTo());

@@ -203,7 +203,7 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
       }
     }
   }
-  //  if (size0>0){
+  if (size0>0){ // K.S.: Added this to avoid 0-division.
     average_density/=size0;
     if(verbose){
       printf("Trying to cut domain of size %d having %d segments and  average cont_density %f\n",dom.getSize(),dom.getNseg(),average_density);
@@ -212,11 +212,12 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
 	printf("Trying segment %d from %d to %d\n",kseg,dom.getSegmentAtPos(kseg).getFrom(),dom.getSegmentAtPos(kseg).getTo());
       }
     }
-    //  }else{
-    //    return -1;	  
-    //}
+    }else{
+    val.AD = 123456;
+    return -1;
+  }
     
-  if(val.first_cut) {
+  if(val.first_cut) { // K.S.: What does this if sentence do...? I think the flag first_cut is doing nothing.
     val.AD = average_density;
   };
   val.AD = average_density;
@@ -224,8 +225,13 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
   if(verbose){
     printf("AD=%f\n", average_density);
   }
+
+  if (val.AD > 0){ // K.S.: Added this to avoid 0-division.
+    val.s_min/=val.AD;
+  }else{
+    val.s_min = PDPParameters::CUT_OFF_VALUE + 1.0; // Forced to accept "if(val.s_min > PDPParameters::CUT_OFF_VALUE){" line;
+  }
   
-  val.s_min/=val.AD;
   if(verbose){
     printf("after single cut: s_min = %f site_min = %d\n",val.s_min,site_min);
   }
