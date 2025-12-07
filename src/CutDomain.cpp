@@ -1,5 +1,5 @@
 #include "CutDomain.hpp"
-bool verbose_cut = PDPParameters::VERBOSE;;
+
 CutDomain::CutDomain(std::vector<Atom> &ca, PDPDistanceMatrix &pdpMatrix, std::vector<int> &init_cutsites){
     this->dist = pdpMatrix.getDist();
     this->ca = ca;
@@ -9,6 +9,7 @@ CutDomain::CutDomain(std::vector<Atom> &ca, PDPDistanceMatrix &pdpMatrix, std::v
 }
 
 void CutDomain::cutDomain(Domain& dom, CutSites& cut_sites,PDPDistanceMatrix& pdpMatrix, CutValues& val) {
+  bool verbose_cut = PDPParameters::VERBOSE;;
   int site = -1;
   val.site2 = 0;
   if (init_cutsites.size()<=0){

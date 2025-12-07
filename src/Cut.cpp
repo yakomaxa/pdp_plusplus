@@ -5,11 +5,10 @@
 #include "PDPDistanceMatrix.hpp"
 #include "PDPParameters.hpp"
 
-bool verbose = PDPParameters::VERBOSE;;
 int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
              std::vector<std::vector<int>>& dist,
              PDPDistanceMatrix& pdpMatrix){
-    
+  bool verbose = PDPParameters::VERBOSE;;    
   int nclose = pdpMatrix.getNclose();
   ////printf("nclose %i\n",nclose);
   std::vector<int> iclose = pdpMatrix.getIclose();
@@ -222,7 +221,7 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
   }else{
     val.AD = 123456;
     if(verbose){
-      printf("could have had NaN because size0 == 0, forced to exit!");
+      printf("could have had NaN because size0 == 0, forced to exit!\n");
       printf("at the end of cut: s_min %f CUTOFF %f site_min %d *site2 %d\n",val.s_min,PDPParameters::CUT_OFF_VALUE,site_min,val.site2);
     }
     return -1;
@@ -241,7 +240,7 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
     val.s_min/=val.AD;
   }else{
     if(verbose){
-      printf("could have had NaN because val.AD  == 0, forced to exit!");
+      printf("could have had NaN because val.AD  == 0, forced to exit!\n");
       printf("at the end of cut: s_min %f CUTOFF %f site_min %d *site2 %d\n",val.s_min,PDPParameters::CUT_OFF_VALUE,site_min,val.site2);
     }
     return -1;

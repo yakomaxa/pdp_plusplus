@@ -14,7 +14,7 @@
 // the former returns 1–96, but the latter does not return anything, removing all the small fragments
 // This clustering part of PDP++ might need debugging, or the original PDP is flawed; if the original is executed with -v, it shows many super large double (float) for the variable named avd, which suggests merging is superficial and misled by these weird scores: I think the insanely large value is something from NaN or overflow. But it's float, so it causes mis-scoring!
 
-bool verbose_cluster = PDPParameters::VERBOSE;
+
 
 std::vector<int> ClusterDomains::visibleDomains;
 int ClusterDomains::ndom;
@@ -103,6 +103,7 @@ int ClusterDomains::isContacting(Domain& i,Domain& j,const std::vector<int>& icl
 };
     
 std::vector<Domain> combine(std::vector<Domain> &domains, int Si, int Sj, double maximum_value, std::vector<std::vector<int>> &contacts) {
+  bool verbose_cluster = PDPParameters::VERBOSE;
   if (verbose_cluster){
         std::cout << "  +++  combining domains " << Si << " " << Sj << "\n";
   }
@@ -138,6 +139,8 @@ std::vector<Domain> combine(std::vector<Domain> &domains, int Si, int Sj, double
 std::vector<Domain> ClusterDomains::cluster(
                             std::vector<Domain>& domains,
                             PDPDistanceMatrix& pdpDistMatrix){
+
+  bool verbose_cluster = PDPParameters::VERBOSE;
   ClusterDomains::ndom = (int)domains.size();
   int Si = -1;
   int Sj = -1;
