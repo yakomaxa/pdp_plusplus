@@ -142,76 +142,81 @@ int main(int argc, char *argv[]){
   if (PDPParameters::VERBOSE){
     printf("---------Initial splitting done\n");
   }
+
+  
   domains =  cutDomain.getDomains();  
   // Cluster domains
   if (PDPParameters::VERBOSE){
     printf("---------Clustering domains\n");
   }
-  domains = ClusterDomains::cluster(domains, pdpMatrix);
-  if (PDPParameters::VERBOSE){
-    printf("---------Clustering domains Done\n");
-  }
-
-  for (int i= 0 ; i < (int)domains.size(); i++){
-    for (int j = 0 ; j < domains[i].getNseg();j++){
-      domains[i].getSegmentAtPos(j).setFromOrg(ca[domains[i].getSegmentAtPos(j).getFrom()].getIndexOrg());
-      domains[i].getSegmentAtPos(j).setToOrg(ca[domains[i].getSegmentAtPos(j).getTo()].getIndexOrg());
-      domains[i].getSegmentAtPos(j).setChain(ca[domains[i].getSegmentAtPos(j).getTo()].getChain());
-      domains[i].getSegmentAtPos(j).setChainId(ca[domains[i].getSegmentAtPos(j).getTo()].getChainId());      
+  
+  std::vector<std::vector<Domain>> h_domain;
+  h_domain = ClusterDomains::cluster(domains, pdpMatrix);
+  for (unsigned int idoms=0; idoms < h_domain.size(); idoms++){
+    domains = h_domain[idoms];
+    if (PDPParameters::VERBOSE){
+      printf("---------Clustering domains Done\n");
     }
-  }
+    listdomains(domains);
 
-  listdomains(domains);
-
-  for(int j=0;j<(int)domains.size();j++) {
-    std::sort(domains[j].getSegments().begin(),
-    	      domains[j].getSegments().end(),SegmentComparator());
-    for (int i=0;i<domains[j].getNseg()-1;i++){
-      std::cout << domains[j].getSegmentAtPos(i) << std::endl;
-      
-      if((domains[j].getSegmentAtPos(i).getToOrg())==(domains[j].getSegmentAtPos(i+1).getFromOrg()-1)
-	 && (domains[j].getSegmentAtPos(i).getChain()==(domains[j].getSegmentAtPos(i+1).getChain()))){
-	
-       	domains[j].getSegmentAtPos(i).setToOrg(domains[j].getSegmentAtPos(i+1).getToOrg());
-	domains[j].getSegmentAtPos(i).setTo(domains[j].getSegmentAtPos(i+1).getTo());
-	domains[j].addNseg(-1);
-	if (PDPParameters::VERBOSE){
-	  printf("NSEG=%i\n",domains[j].getNseg());
-	}
-	for(int l=i+1;l<domains[j].getNseg();l++){
-	  domains[j].getSegmentAtPos(l).setToOrg(domains[j].getSegmentAtPos(l+1).getToOrg());
-	  domains[j].getSegmentAtPos(l).setTo(domains[j].getSegmentAtPos(l+1).getTo());	  
-	  domains[j].getSegmentAtPos(l).setFromOrg(domains[j].getSegmentAtPos(l+1).getFromOrg());
-	  domains[j].getSegmentAtPos(l).setFrom(domains[j].getSegmentAtPos(l+1).getFrom());
-	  domains[j].getSegmentAtPos(l).setChain(domains[j].getSegmentAtPos(l+1).getChain());
-	}
-	if (PDPParameters::VERBOSE){
-	  printf("%i\n",i);
-	}
-	i--;
+    for (int i= 0 ; i < (int)domains.size(); i++){
+      for (int j = 0 ; j < domains[i].getNseg();j++){
+	domains[i].getSegmentAtPos(j).setFromOrg(ca[domains[i].getSegmentAtPos(j).getFrom()].getIndexOrg());
+	domains[i].getSegmentAtPos(j).setToOrg(ca[domains[i].getSegmentAtPos(j).getTo()].getIndexOrg());
+	domains[i].getSegmentAtPos(j).setChain(ca[domains[i].getSegmentAtPos(j).getTo()].getChain());
+	domains[i].getSegmentAtPos(j).setChainId(ca[domains[i].getSegmentAtPos(j).getTo()].getChainId());      
       }
     }
+    
+    for(int j=0;j<(int)domains.size();j++) {
+      std::sort(domains[j].getSegments().begin(),
+		domains[j].getSegments().end(),SegmentComparator());
+      for (int i=0;i<domains[j].getNseg()-1;i++){
+	std::cout << domains[j].getSegmentAtPos(i) << std::endl;
+	
+	if((domains[j].getSegmentAtPos(i).getToOrg())==(domains[j].getSegmentAtPos(i+1).getFromOrg()-1)
+	   && (domains[j].getSegmentAtPos(i).getChain()==(domains[j].getSegmentAtPos(i+1).getChain()))){
+	  
+	  domains[j].getSegmentAtPos(i).setToOrg(domains[j].getSegmentAtPos(i+1).getToOrg());
+	  domains[j].getSegmentAtPos(i).setTo(domains[j].getSegmentAtPos(i+1).getTo());
+	  domains[j].addNseg(-1);
+	  if (PDPParameters::VERBOSE){
+	    printf("NSEG=%i\n",domains[j].getNseg());
+	  }
+	  for(int l=i+1;l<domains[j].getNseg();l++){
+	    domains[j].getSegmentAtPos(l).setToOrg(domains[j].getSegmentAtPos(l+1).getToOrg());
+	    domains[j].getSegmentAtPos(l).setTo(domains[j].getSegmentAtPos(l+1).getTo());	  
+	    domains[j].getSegmentAtPos(l).setFromOrg(domains[j].getSegmentAtPos(l+1).getFromOrg());
+	    domains[j].getSegmentAtPos(l).setFrom(domains[j].getSegmentAtPos(l+1).getFrom());
+	    domains[j].getSegmentAtPos(l).setChain(domains[j].getSegmentAtPos(l+1).getChain());
+	  }
+	  if (PDPParameters::VERBOSE){
+	    printf("%i\n",i);
+	  }
+	  i--;
+	}
+      }
+    }
+    
+    
+    if (PDPParameters::VERBOSE){
+      listdomains(domains);
+    }
+    listdomains(domains,std::to_string(idoms)+"_naive.pml"); //should allow user to specify file name
+    // Remove short segments
+    if (PDPParameters::VERBOSE){
+      printf("---------Cleanup \n");
+    }
+    ShortSegmentRemover::cleanup(domains);
+    if (PDPParameters::VERBOSE){
+      printf("---------Cleanup Done\n");  
+      printf("FINAL!!\n");
+    }
+    if (PDPParameters::VERBOSE){
+      listdomains(domains);
+    }  
+    listdomains(domains,"removed.pml"); //should allow user to specify file name
   }
-
-
-  if (PDPParameters::VERBOSE){
-    listdomains(domains);
-  }
-  listdomains(domains,"naive.pml"); //should allow user to specify file name
-  // Remove short segments
-  if (PDPParameters::VERBOSE){
-    printf("---------Cleanup \n");
-  }
-  ShortSegmentRemover::cleanup(domains);
-  if (PDPParameters::VERBOSE){
-    printf("---------Cleanup Done\n");  
-    printf("FINAL!!\n");
-  }
-  if (PDPParameters::VERBOSE){
-    listdomains(domains);
-  }  
-  listdomains(domains,"removed.pml"); //should allow user to specify file name
-
   // PDB file exporter should be here
   
   return 0;

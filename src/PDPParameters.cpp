@@ -16,10 +16,10 @@ const float PDPParameters::TD1 = 40.f;
 const float PDPParameters::TD = 25.f;
 const float PDPParameters::DBL = .05f;
 const float PDPParameters::CUT_OFF_VALUE = .50f;
-const float PDPParameters::CUT_OFF_VALUE1 = .29f;
+float PDPParameters::CUT_OFF_VALUE1 = .29f;
 const float PDPParameters::CUT_OFF_VALUE2 = .44f;
-const float PDPParameters::CUT_OFF_VALUE1S = .19f;
-const float PDPParameters::CUT_OFF_VALUE1M = .21f;
+float PDPParameters::CUT_OFF_VALUE1S = .19f;
+float PDPParameters::CUT_OFF_VALUE1M = .21f;
 bool PDPParameters::VERBOSE = false;
 
 void PDPParameters::setMAXLEN(int MAXLEN){

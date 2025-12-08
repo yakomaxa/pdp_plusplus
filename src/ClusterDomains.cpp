@@ -131,12 +131,12 @@ std::vector<Domain> combine(std::vector<Domain> &domains, int Si, int Sj, double
   domains[Sj].removeContacted(Si);
   domains[Si].addSize(domains[Sj].getSize());
 
-  
+  ClusterDomains::ndom -=1;
   return std::move(domains);
 };
 
 
-std::vector<Domain> ClusterDomains::cluster(
+std::vector<std::vector<Domain>> ClusterDomains::cluster(
                             std::vector<Domain>& domains,
                             PDPDistanceMatrix& pdpDistMatrix){
 
@@ -154,9 +154,11 @@ std::vector<Domain> ClusterDomains::cluster(
   double maximum_values = PDPParameters::CUT_OFF_VALUE1S;
   double maximum_valuem = PDPParameters::CUT_OFF_VALUE1M;
   double maximum_value  = PDPParameters::CUT_OFF_VALUE1;
-  
+
+  std::vector<std::vector<Domain>> h_domain;
   if (ClusterDomains::ndom < 2){
-    return domains;
+    h_domain.push_back(domains);
+    return h_domain;
   }
   
   Domain d1;
@@ -232,6 +234,7 @@ std::vector<Domain> ClusterDomains::cluster(
   for (int i = 0 ; i < (int)domains.size() ;i++){
     ClusterDomains::visibleDomains.push_back(i);
   }
+  int prev_ndom = ClusterDomains::visibleDomains.size();
 
 
   //  std::vector<Domain> olddomains = domains; 
@@ -321,18 +324,27 @@ std::vector<Domain> ClusterDomains::cluster(
       
     }else {
       
-      maximum_value = -1.0;
-      maximum_values = -1.0;
-      maximum_valuem = -1.0;      
+      if (visibleDomains.size() < prev_ndom){
+	std::vector<Domain> newdoms;
+	for (auto i : ClusterDomains::visibleDomains){
+	  newdoms.push_back(domains[i]);
+	}
+	h_domain.push_back(newdoms);
+      }
+      prev_ndom = visibleDomains.size();
+      PDPParameters::CUT_OFF_VALUE1=PDPParameters::CUT_OFF_VALUE1*0.99;
+      PDPParameters::CUT_OFF_VALUE1S=PDPParameters::CUT_OFF_VALUE1S*0.99;
+      PDPParameters::CUT_OFF_VALUE1M=PDPParameters::CUT_OFF_VALUE1M*0.99;
+      printf("PREV_NDOM %i %f %f %f\n",prev_ndom, PDPParameters::CUT_OFF_VALUE1, PDPParameters::CUT_OFF_VALUE1S, PDPParameters::CUT_OFF_VALUE1M);
+      if (prev_ndom < 2){
+	break;
+      }
     }
     //    listdomains(domains);
-  } while (maximum_value > 0.0 || maximum_values > 0.0 || maximum_valuem > 0.0);
+    //  } while (maximum_value > 0.0 || maximum_values > 0.0 || maximum_valuem > 0.0);
+  } while (visibleDomains.size()>=1);
 
-  std::vector<Domain> newdoms;
-  for (auto i : ClusterDomains::visibleDomains){
-    newdoms.push_back(domains[i]);
-  }
-  return newdoms;
+  return h_domain;
 };
 
 

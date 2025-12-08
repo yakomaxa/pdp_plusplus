@@ -21,10 +21,10 @@ public:
     static const int MAXCONT;
 
     static const float CUT_OFF_VALUE; /* decide to cut */
-    static const float CUT_OFF_VALUE1; /* decide to combine */
+    static float CUT_OFF_VALUE1; /* decide to combine */
     static const float CUT_OFF_VALUE2; /* decide to double cut */
-    static const float CUT_OFF_VALUE1S; /* decide to combine small domains */
-    static const float CUT_OFF_VALUE1M; /* decide to combine medium domains */
+    static float CUT_OFF_VALUE1S; /* decide to combine small domains */
+    static float CUT_OFF_VALUE1M; /* decide to combine medium domains */
 
     static bool VERBOSE;
 
