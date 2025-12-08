@@ -324,14 +324,16 @@ std::vector<std::vector<Domain>> ClusterDomains::cluster(
       
     }else {
       
-      if (visibleDomains.size() < prev_ndom){
-	std::vector<Domain> newdoms;
-	for (auto i : ClusterDomains::visibleDomains){
-	  newdoms.push_back(domains[i]);
-	}
-	h_domain.push_back(newdoms);
+      //if (visibleDomains.size() < prev_ndom){
+      std::vector<Domain> newdoms;
+      for (auto i : ClusterDomains::visibleDomains){
+	newdoms.push_back(domains[i]);
       }
+      h_domain.push_back(newdoms);
+      //}
       prev_ndom = visibleDomains.size();
+
+
       PDPParameters::CUT_OFF_VALUE1=PDPParameters::CUT_OFF_VALUE1*0.99;
       PDPParameters::CUT_OFF_VALUE1S=PDPParameters::CUT_OFF_VALUE1S*0.99;
       PDPParameters::CUT_OFF_VALUE1M=PDPParameters::CUT_OFF_VALUE1M*0.99;
