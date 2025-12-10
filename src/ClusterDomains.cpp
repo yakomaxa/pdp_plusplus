@@ -322,7 +322,7 @@ std::vector<std::vector<Domain>> ClusterDomains::cluster(
       maximum_values = PDPParameters::CUT_OFF_VALUE1S-.1;
       maximum_valuem = PDPParameters::CUT_OFF_VALUE1M-.1;
       
-    }else {
+    }else{
       
       //if (visibleDomains.size() < prev_ndom){
       std::vector<Domain> newdoms;
