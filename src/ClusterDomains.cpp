@@ -22,24 +22,6 @@ ClusterDomains::ClusterDomains(){
 
 }
 
-static void listdomains(std::vector<Domain>& domains) {
-  int i = -1;
-  for (Domain& dom : domains) {
-    i++;
-    std::cout << "create DOMAIN" << i << ", resi ";
-    std::vector<Segment>& segments = dom.getSegments();
-
-    int flag=0;
-    for (Segment& s : segments) {
-      if (flag>0){
-	std::cout << "+" ;
-      }
-      std::cout << s ;
-      flag++;
-    }
-    std::cout << ";" << "\n";
-  }
-};
 
 int calc_S(const int a1,
             const int b1,
