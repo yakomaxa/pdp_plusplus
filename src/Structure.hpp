@@ -25,6 +25,7 @@ private:
 public:
     gemmi::Structure structure;
     int numResidues;
+    std::vector<std::vector<std::string>> pdp_rows;
     Structure(std::string filename);
     std::vector<Atom> getRepresentativeAtomArray();
     std::vector<int> tailofchain;

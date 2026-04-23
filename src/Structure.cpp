@@ -8,18 +8,34 @@
 #include "Structure.hpp"
 #include "PDPParameters.hpp"
 
-gemmi::Structure openCoordinatefile(const std::string & infilename){
-  gemmi::MaybeGzipped inputfile(infilename);
-  gemmi::CoorFormat infileformat = gemmi::coor_format_from_ext(inputfile.basepath());
-  if(infileformat != gemmi::CoorFormat::Unknown){
-    return gemmi::read_structure(inputfile, infileformat);
-  }else{
-    return gemmi::read_structure(inputfile, gemmi::CoorFormat::Pdb);
-  }
-};
+static std::vector<std::vector<std::string>> extractPdpRows(
+    const gemmi::cif::Document& doc) {
+  static const int PDP_TAG_COUNT = 9;
+  std::vector<std::vector<std::string>> rows;
+  if (doc.blocks.empty()) return rows;
+  gemmi::cif::Column col =
+      const_cast<gemmi::cif::Block&>(doc.blocks[0]).find_loop("_pdp.ordinal");
+  if (!col) return rows;
+  const gemmi::cif::Loop* loop = col.get_loop();
+  if (!loop || (int)loop->tags.size() != PDP_TAG_COUNT) return rows;
+  int w = PDP_TAG_COUNT;
+  for (int i = 0; i + w <= (int)loop->values.size(); i += w)
+    rows.emplace_back(loop->values.begin() + i, loop->values.begin() + i + w);
+  return rows;
+}
 
 Structure::Structure(std::string filename){
-    this->structure=openCoordinatefile(filename);
+  gemmi::MaybeGzipped inputfile(filename);
+  gemmi::CoorFormat fmt = gemmi::coor_format_from_ext(inputfile.basepath());
+  if (fmt == gemmi::CoorFormat::Mmcif) {
+    gemmi::cif::Document doc = gemmi::cif::read(std::move(inputfile));
+    this->pdp_rows = extractPdpRows(doc);
+    this->structure = gemmi::make_structure(doc);
+  } else {
+    gemmi::MaybeGzipped inputfile2(filename);
+    this->structure = gemmi::read_structure(
+        inputfile2, fmt == gemmi::CoorFormat::Unknown ? gemmi::CoorFormat::Pdb : fmt);
+  }
     this->numResidues = 0;
     for (gemmi::Model& model : this->structure.models){
         for (gemmi::Chain& chain : model.chains) {
