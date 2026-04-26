@@ -198,8 +198,10 @@ void writeDomainJson(std::vector<Domain>& naive_domains,
     out << "  {\n";
     out << "    \"domain_index\": " << di << ",\n";
     out << "    \"segments\": [\n";
+    int domain_size = 0;
     for (int si = 0; si < dom.getNseg(); si++) {
       Segment& seg = dom.getSegmentAtPos(si);
+      domain_size +=  seg.getToOrg() - seg.getFromOrg() + 1;
       out << "      {\"chain\": \"" << seg.getChain()
           << "\", \"from\": " << seg.getFromOrg()
           << ", \"to\": " << seg.getToOrg() << "}";
@@ -207,6 +209,7 @@ void writeDomainJson(std::vector<Domain>& naive_domains,
       out << "\n";
     }
     out << "    ],\n";
+    out << "    \"n_residue\": " << domain_size << ",\n";
     out << "    \"survived_cleanup\": " << survived << "\n";
     out << "  }";
     if (di < (int)naive_domains.size() - 1) out << ",";
