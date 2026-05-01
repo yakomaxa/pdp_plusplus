@@ -37,17 +37,22 @@ Structure::Structure(std::string filename){
         inputfile2, fmt == gemmi::CoorFormat::Unknown ? gemmi::CoorFormat::Pdb : fmt);
   }
     this->numResidues = 0;
+    int n_model = 0;
     for (gemmi::Model& model : this->structure.models){
-        for (gemmi::Chain& chain : model.chains) {
-            for (gemmi::Residue& residue : chain.residues) {
-                for (gemmi::Atom &atom : residue.atoms) {
-                    std::string elementname = atom.element.name();
-                    if (atom.name == "CA" && elementname == "C"){
-                        this->numResidues += 1;
-                    }
-                }
-            }
-        }
+      n_model += 1;
+      if (n_model > 1){
+	break;
+      }
+      for (gemmi::Chain& chain : model.chains) {
+	for (gemmi::Residue& residue : chain.residues) {
+	  for (gemmi::Atom &atom : residue.atoms) {
+	    std::string elementname = atom.element.name();
+	    if (atom.name == "CA" && elementname == "C"){
+	      this->numResidues += 1;
+	    }
+	  }
+	}
+      }
     }
 };
 
@@ -58,7 +63,12 @@ std::vector<Atom> Structure::getRepresentativeAtomArray(){
   int CA_flag=0;
   int chainid=0;
   int maxindex=0;
+  int n_model = 0;
   for (gemmi::Model& model : this->structure.models){
+    n_model += 1;
+    if (n_model > 1){
+      break;
+    }
     for (gemmi::Chain& chain : model.chains) {
       CA_flag=0;
       for (gemmi::Residue& residue : chain.residues) {
