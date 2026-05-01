@@ -134,6 +134,14 @@ int main(int argc, char* argv[]) {
 
   if (PDPParameters::VERBOSE) printf("---------Reading structure\n");
   Structure s(filename);
+
+  if (s.numResidues < 10){
+    if (verbosity >= 1){
+      std::cout << "PDP skipped " <<  argv[1] << " as this structure has C-alpha atoms less than 10." << std::endl;
+    }
+    return 1;
+  }
+  
   if (PDPParameters::VERBOSE) printf("---------Reading structure Done\n");
 
   PDPParameters param;
