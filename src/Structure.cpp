@@ -85,7 +85,9 @@ Structure::Structure(std::string filename){
 	  }
 	}
 	if (num_calpha_of_chain <= PDPParameters::MIN_CHAIN_LENGTH){
-	  std::cout << "[Structure.cpp]: Subchain " << sub_id << " was not considered in residue counter as it's shorter than or equal to " << PDPParameters::MIN_CHAIN_LENGTH << std::endl;
+	  if (PDPParameters::VERBOSE){
+	    std::cout << "[Structure.cpp]: Subchain " << sub_id << " was not considered in residue counter as it's shorter than or equal to " << PDPParameters::MIN_CHAIN_LENGTH << std::endl;
+	  }
 	}else{
 	  this->numResidues += num_calpha_of_chain;
 	}
