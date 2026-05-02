@@ -97,7 +97,7 @@ std::vector<Atom> Structure::getRepresentativeAtomArray(){
 	    Atoms[index].setIndexOrg(resi);
 	    Atoms[index].setChainId(chainid);
 	    Atoms[index].setResidue(residue.name);
-	    std::cout << Atoms[index].getX() << " " << Atoms[index].getY()  << " "<<  Atoms[index].getChain() << " " << Atoms[index].getIndexOrg() << " "<< Atoms[index].getChainId()  << " " << Atoms[index].getResidue() <<  std::endl;	    
+	    //std::cout << Atoms[index].getX() << " " << Atoms[index].getY()  << " "<<  Atoms[index].getChain() << " " << Atoms[index].getIndexOrg() << " "<< Atoms[index].getChainId()  << " " << Atoms[index].getResidue() <<  std::endl;	    
 	    if (maxindex < index){
 	      maxindex = index;
 	    }	      
