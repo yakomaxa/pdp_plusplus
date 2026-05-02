@@ -33,7 +33,7 @@ static std::string makeTimestamp() {
 }
 
 static DomainSeq filterDomainStructure(Domain& dom,
-                                              const gemmi::Structure& structure) {
+                                              gemmi::Structure& structure) {
 
   gemmi::Structure out_struct = structure;
   out_struct.models.clear();
@@ -43,39 +43,42 @@ static DomainSeq filterDomainStructure(Domain& dom,
     return out_domain;
   }
   std::string fasta;
-  gemmi::Model out_model = structure.models[0];
-  out_model.chains.clear();
-  
-  for (int si = 0; si < dom.getNseg(); si++) {
-    Segment& seg = dom.getSegmentAtPos(si);
-    for (const gemmi::Chain& chain : structure.models[0].chains) {
-      gemmi::ConstResidueSpan polymer = chain.get_polymer();
-      if (polymer.empty()){
-	continue;
-      }
-      if (seg.getChain() == chain.name){
+  int n_model = 0;
+  for (gemmi::Model& model : structure.models){
+    n_model += 1;
+    if (n_model > 1){
+      break;
+    }
+    gemmi::Model out_model = model;
+    out_model.chains.clear();
+    for (int si = 0; si < dom.getNseg(); si++) {
+      Segment& seg = dom.getSegmentAtPos(si);
+      for (gemmi::Chain& chain : model.chains) {
 	gemmi::Chain out_chain = chain;
 	out_chain.residues.clear();
 	out_chain.name = chain.name;
-	for (const gemmi::Residue& res : polymer) {
-	  int seqid = std::stoi(res.label_seq.str());
-	  if (seqid >= seg.getFromOrg() && seqid <= seg.getToOrg()){
-	    out_chain.residues.push_back(res);
+	for (gemmi::ResidueSpan& sub : chain.subchains()){	  
+	  std::string sub_id = sub.subchain_id();
+	  if (seg.getChain() == sub_id){
+	    for (gemmi::Residue& res : sub) {
+	      int seqid = std::stoi(res.label_seq.str());
+	      if (seqid >= seg.getFromOrg() && seqid <= seg.getToOrg()){
+		out_chain.residues.push_back(res);
+	      }
+	    }
+	  }
+	  if (!sub.empty()){
+	    std::string seq = gemmi::make_one_letter_sequence(sub);
+	    fasta += ">chain_" + sub_id + "_segment_" + std::to_string(si) + "\n" + seq + "\n";
 	  }
 	}
-	gemmi::ConstResidueSpan out_polymer = out_chain.get_polymer();
-	if (!out_polymer.empty()){
-	  std::string seq = gemmi::make_one_letter_sequence(out_polymer);
-	  fasta += ">chain_" + chain.name + "_segment_" + std::to_string(si) + "\n" + seq + "\n";
-	}
-
 	if (!out_chain.residues.empty()){
 	  out_model.chains.push_back(std::move(out_chain));
 	}
       }
     }
+    out_struct.models.push_back(std::move(out_model));
   }
-  out_struct.models.push_back(std::move(out_model));
   // set domain container
   out_domain.setValues(out_struct, fasta);
   return out_domain;
@@ -130,7 +133,7 @@ static const std::vector<std::string> PDP_TAGS = {
 
 void writeDomainFiles(std::vector<Domain>& domains,
 		      std::vector<Domain>& naive_domains,
-                      const Structure& s,
+                      Structure& s,
                       const std::string& prefix,
                       const std::vector<std::string> OutFormats,
                       const std::string& input_path,

@@ -20,6 +20,8 @@ const float PDPParameters::CUT_OFF_VALUE1 = .29f;
 const float PDPParameters::CUT_OFF_VALUE2 = .44f;
 const float PDPParameters::CUT_OFF_VALUE1S = .19f;
 const float PDPParameters::CUT_OFF_VALUE1M = .21f;
+const int PDPParameters::MIN_CHAIN_LENGTH = 3;
+const int PDPParameters::MIN_STRUCT_SIZE = 3;
 bool PDPParameters::VERBOSE = false;
 
 void PDPParameters::setMAXLEN(int MAXLEN){

@@ -14,20 +14,20 @@ void CutDomain::cutDomain(Domain& dom, CutSites& cut_sites,PDPDistanceMatrix& pd
   val.site2 = 0;
   if (init_cutsites.size()<=0){
     if (verbose_cut){
-      printf("CUTTING DE NOVO\n");
+      printf("[CutDomain.cpp] CUTTING DE NOVO\n");
     }
     Cut cut;
     site = cut.cut(ca, dom, val, dist, pdpMatrix);
   }else{
     if (verbose_cut){
-      printf("CUTTING OF GIVEN\n");
+      printf("[CutDomain.cpp] CUTTING OF GIVEN\n");
     }
     site = init_cutsites.back();
     init_cutsites.pop_back();
   }
 
   if (verbose_cut){
-    printf("site %i \n",site)   ;
+    printf("[CutDomain.cpp] site %i \n",site)   ;
   }
   
   if (site < 0) {
@@ -35,7 +35,7 @@ void CutDomain::cutDomain(Domain& dom, CutSites& cut_sites,PDPDistanceMatrix& pd
     domains.push_back(dom);
     ndom++;
     if (verbose_cut){
-      std::cout << "HOGE NDOM" << ndom << std::endl;
+      std::cout << "[CutDomain.cpp] Number of domain = " << ndom << std::endl;
     }
     return;
   }
@@ -43,8 +43,8 @@ void CutDomain::cutDomain(Domain& dom, CutSites& cut_sites,PDPDistanceMatrix& pd
     cut_sites.addNcuts(1);
     cut_sites.pushbackCutSites(site);
     if (verbose_cut){
-      std::cout << "HOGE SITE " << site << std::endl;
-      std::cout << "HOGE SITE2 " << val.site2 << std::endl;
+      std::cout << "[CutDomain.cpp] CUT SITE1 = " << site << std::endl;
+      std::cout << "[CutDomain.cpp] CUT SITE2 = " << val.site2 << std::endl;
     }
     Domain dom1;
     dom1.setNseg(0);
@@ -129,12 +129,12 @@ void CutDomain::cutDomain(Domain& dom, CutSites& cut_sites,PDPDistanceMatrix& pd
     }
 
     if(verbose_cut){
-      printf("cutr dom1: nseg %d\n",dom1.getNseg());
+      printf("[CutDomain.cpp] cutr dom1: nseg %d\n",dom1.getNseg());
     }
 
     if ( verbose_cut){
       for(int iv=0;iv<dom1.getNseg();iv++){
-	printf("cutr dom1 from %d to %d\n",dom1.getSegmentAtPos(iv).getFrom(),dom1.getSegmentAtPos(iv).getTo());
+	printf("[CutDomain.cpp] cutr dom1 from %d to %d\n",dom1.getSegmentAtPos(iv).getFrom(),dom1.getSegmentAtPos(iv).getTo());
       }
     }
 
@@ -157,12 +157,12 @@ void CutDomain::cutDomain(Domain& dom, CutSites& cut_sites,PDPDistanceMatrix& pd
     **/
 
     if(verbose_cut){
-      printf("cutr dom2: nseg %d\n",dom2.getNseg());
+      printf("[CutDomain.cpp] cutr dom2: nseg %d\n",dom2.getNseg());
     }
     
     if (verbose_cut){
       for(int iv=0;iv<dom2.getNseg();iv++){
-        printf("cutr dom2 from %d to %d\n",dom2.getSegmentAtPos(iv).getFrom(),dom2.getSegmentAtPos(iv).getTo());
+        printf("[CutDomain.cpp] cutr dom2 from %d to %d\n",dom2.getSegmentAtPos(iv).getFrom(),dom2.getSegmentAtPos(iv).getTo());
       }
     }
 

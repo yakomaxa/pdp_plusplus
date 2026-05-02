@@ -87,7 +87,7 @@ int ClusterDomains::isContacting(Domain& i,Domain& j,const std::vector<int>& icl
 std::vector<Domain> combine(std::vector<Domain> &domains, int Si, int Sj, double maximum_value, std::vector<std::vector<int>> &contacts) {
   bool verbose_cluster = PDPParameters::VERBOSE;
   if (verbose_cluster){
-        std::cout << "  +++  combining domains " << Si << " " << Sj << "\n";
+        std::cout << "[ClusterDomain.cpp]  +++  combining domains " << Si << " " << Sj << "\n";
   }
   for (int i = 0; i < domains[Sj].getNseg(); i++) {
     domains[Si].getSegmentAtPos(domains[Si].getNseg()).setFrom(domains[Sj].getSegmentAtPos(i).getFrom());
@@ -201,7 +201,7 @@ std::vector<Domain> ClusterDomains::cluster(
     }
 
     if (verbose_cluster){
-      std::cout << " pos: d1:" << i << " vs d2:" << j << " d1:" << d1.getSegmentAtPos(0).getFrom() << "-" << d1.getSegmentAtPos(0).getTo() << " " <<  d2.getSegmentAtPos(0).getFrom() << "-" << d2.getSegmentAtPos(0).getTo() << " " << total_contacts << "\n" ;
+      std::cout << "[ClusterDomain.cpp] pos: d1:" << i << " vs d2:" << j << " d1:" << d1.getSegmentAtPos(0).getFrom() << "-" << d1.getSegmentAtPos(0).getTo() << " " <<  d2.getSegmentAtPos(0).getFrom() << "-" << d2.getSegmentAtPos(0).getTo() << " " << total_contacts << "\n" ;
     }
     
     contacts_list[i][j]=contacts_list[j][i]=total_contacts;
@@ -248,9 +248,9 @@ std::vector<Domain> ClusterDomains::cluster(
 	double S_value= double(total_contacts)/(double)total_max_contacts;
 		
       if(verbose_cluster) {
-	printf("size1=%i size2=%i minDomSize=%f maxDomSize=%f total_contacts = %i \n", size1,size2,minDomSize,maxDomSize,total_contacts);
-	printf(" total_contacts = %i total_max_contacts = %i\n", total_contacts, total_max_contacts);
-	printf(" maximum_value = %f S_value = %f\n",maximum_value, S_value);
+	printf("[ClusterDomain.cpp] size1=%i size2=%i minDomSize=%f maxDomSize=%f total_contacts = %i \n", size1,size2,minDomSize,maxDomSize,total_contacts);
+	printf("[ClusterDomain.cpp]  total_contacts = %i total_max_contacts = %i\n", total_contacts, total_max_contacts);
+	printf("[ClusterDomain.cpp]  maximum_value = %f S_value = %f\n",maximum_value, S_value);
       }
       
       if (S_value  > maximum_value) {

@@ -48,7 +48,9 @@ static void mergeAdjacentSegments(std::vector<Domain>& domains) {
         cur.setToOrg(next.getToOrg());
         cur.setTo(next.getTo());
         dom.addNseg(-1);
-        if (PDPParameters::VERBOSE) printf("NSEG=%i\n", dom.getNseg());
+        if (PDPParameters::VERBOSE){
+	  printf("[Main.cpp] Number of segments in this domain = %i\n", dom.getNseg());
+	}
         for (int l = i + 1; l < dom.getNseg(); l++) {
           Segment& s = dom.getSegmentAtPos(l);
           Segment& t = dom.getSegmentAtPos(l + 1);
@@ -134,56 +136,56 @@ int main(int argc, char* argv[]) {
 
   PDPParameters::VERBOSE = (verbosity >= 2);
 
-  if (PDPParameters::VERBOSE) printf("---------Reading structure\n");
+  if (PDPParameters::VERBOSE) printf("[Main.cpp] ---------Reading structure\n");
   Structure s(filename);
   
-  if (s.numResidues < 10){
+  if (s.numResidues <=  PDPParameters::MIN_STRUCT_SIZE){
     if (verbosity >= 1){
-      std::cout << "PDP skipped " <<  argv[1] << " as this structure has C-alpha atoms less than 10." << std::endl;
+      std::cout << "[Main.cpp] PDP skipped input file " <<  argv[1] << " as this structure has C-alpha atoms less than or equal to " << PDPParameters::MIN_STRUCT_SIZE << std::endl;
     }
     return 1;
   }
   
-  if (PDPParameters::VERBOSE) printf("---------Reading structure Done\n");
+  if (PDPParameters::VERBOSE) printf("[Main.cpp]---------Reading structure Done\n");
 
   PDPParameters param;
   param.setMAXLEN(s.numResidues);
   
-  if (PDPParameters::VERBOSE) printf("---------Get Repr atoms\n");
+  if (PDPParameters::VERBOSE) printf("[Main.cpp]---------Get Repr atoms\n");
   std::vector<Atom> ca = s.getRepresentativeAtomArray();
 
-  if (PDPParameters::VERBOSE) printf("---------Get Repr atoms Done\n");
-  if (PDPParameters::VERBOSE) printf("---------distMat creation\n");
+  if (PDPParameters::VERBOSE) printf("[Main.cpp]---------Get Repr atoms Done\n");
+  if (PDPParameters::VERBOSE) printf("[Main.cpp]---------distMat creation\n");
   PDPDistanceMatrix pdpMatrix = GetDistanceMatrix().getDistanceMatrix(ca);
-  if (PDPParameters::VERBOSE) printf("---------distMat creation Done\n");
+  if (PDPParameters::VERBOSE) printf("[Main.cpp]---------distMat creation Done\n");
 
-  if (PDPParameters::VERBOSE) printf("---------Setting domain info\n");
+  if (PDPParameters::VERBOSE) printf("[Main.cpp]---------Setting domain info\n");
   Domain dom;
   dom.setId("testDomain");
   dom.setSize((int)ca.size());
   dom.setNseg(1);
   dom.getSegmentAtPos(0).setFrom(0);
   dom.getSegmentAtPos(0).setTo((int)ca.size() - 1);
-  if (PDPParameters::VERBOSE) printf("---------Setting domain info done\n");
+  if (PDPParameters::VERBOSE) printf("[Main.cpp]---------Setting domain info done\n");
 
   s.tailofchain.pop_back();
   std::vector<int> init_cutsites;
   for (int i : s.tailofchain) {
-    if (PDPParameters::VERBOSE) printf("ADDING INITAIAL SITE%i\n", i);
+    if (PDPParameters::VERBOSE) printf("[Main.cpp] ADDING INITAIAL SITE%i\n", i);
     init_cutsites.push_back(i + 1);
   }
 
-  if (PDPParameters::VERBOSE) printf("---------Initial splitting\n");
+  if (PDPParameters::VERBOSE) printf("[Main.cpp]---------Initial splitting\n");
   CutSites cutSites;
   CutValues val;
   CutDomain cutDomain(ca, pdpMatrix, init_cutsites);
   cutDomain.cutDomain(dom, cutSites, pdpMatrix, val);
-  if (PDPParameters::VERBOSE) printf("---------Initial splitting done\n");
+  if (PDPParameters::VERBOSE) printf("[Main.cpp]---------Initial splitting done\n");
 
-  if (PDPParameters::VERBOSE) printf("---------Clustering domains\n");
+  if (PDPParameters::VERBOSE) printf("[Main.cpp]---------Clustering domains\n");
   std::vector<Domain> domains = cutDomain.getDomains();
   domains = ClusterDomains::cluster(domains, pdpMatrix);
-  if (PDPParameters::VERBOSE) printf("---------Clustering domains Done\n");
+  if (PDPParameters::VERBOSE) printf("[Main.cpp]---------Clustering domains Done\n");
 
   resolveOriginalCoords(domains, ca);
 
@@ -198,9 +200,9 @@ int main(int argc, char* argv[]) {
 
   std::vector<Domain> naive_domains = domains;
 
-  if (PDPParameters::VERBOSE) printf("---------Cleanup\n");
+  if (PDPParameters::VERBOSE) printf("[Main.cpp]---------Cleanup\n");
   ShortSegmentRemover::cleanup(domains);
-  if (PDPParameters::VERBOSE) printf("---------Cleanup Done\nFINAL!!\n");
+  if (PDPParameters::VERBOSE) printf("[Main.cpp]---------Cleanup Done\nFINAL!!\n");
   if (PDPParameters::VERBOSE) listdomains(domains);
   if (outflags.pml) listdomains(domains, outprefix + "_removed.pml");
 

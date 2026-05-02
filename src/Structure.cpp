@@ -51,17 +51,27 @@ Structure::Structure(std::string filename){
       break;
     }
     for (gemmi::Chain& chain : model.chains) {
-      int resi = 1;
-      for (gemmi::Residue& residue : chain.residues) {
-	if (!is_integer(residue.label_seq.str())){
-	  //residue.label_seq = stoi(residue.seqid.str()) ;
-	  residue.label_seq = resi;
-	  resi += 1;
+      for (gemmi::ResidueSpan& sub : chain.subchains()){
+	if ( sub.length() <= PDPParameters::MIN_CHAIN_LENGTH){
+	  std::string sub_id = sub.subchain_id();
+	  if (PDPParameters::VERBOSE){
+	    std::cout << "[Structure.cpp]: Subchain " << sub_id << " was skipped as it's shorter than or equal to " << PDPParameters::MIN_CHAIN_LENGTH << std::endl;
+	  }	  
+	  continue;
 	}
-	for (gemmi::Atom &atom : residue.atoms) {
-	  std::string elementname = atom.element.name();
-	  if (atom.name == "CA" && elementname == "C"){
-	    this->numResidues += 1;
+
+	int resi = 1;
+	for (gemmi::Residue& residue : sub) {
+	  if (!is_integer(residue.label_seq.str())){
+	    //residue.label_seq = stoi(residue.seqid.str()) ;
+	    residue.label_seq = resi;
+	    resi += 1;
+	  }
+	  for (const gemmi::Atom &atom : residue.atoms) {
+	    std::string elementname = atom.element.name();
+	    if (atom.name == "CA" && elementname == "C"){
+	      this->numResidues += 1;
+	    }
 	  }
 	}
       }
@@ -83,40 +93,50 @@ std::vector<Atom> Structure::getRepresentativeAtomArray(){
       break;
     }
     for (gemmi::Chain& chain : model.chains) {
-      CA_flag=0;
-      gemmi::ConstResidueSpan polymer = chain.get_polymer();
-      for (const gemmi::Residue& residue : polymer) {	
-	for (const gemmi::Atom &atom : residue.atoms) {
-	  std::string elementname = atom.element.name();
-	  if (atom.name == "CA" && elementname == "C"){
-	    index += 1;
-	    Atoms[index].setX(atom.pos.x);
-	    Atoms[index].setY(atom.pos.y);
-	    Atoms[index].setZ(atom.pos.z);
-	    Atoms[index].setChain(chain.name);	  
-	    resi=stoi(residue.label_seq.str());
-	    Atoms[index].setIndexOrg(resi);
-	    Atoms[index].setChainId(chainid);
-	    Atoms[index].setResidue(residue.name);
-	    //std::cout << Atoms[index].getX() << " " << Atoms[index].getY()  << " "<<  Atoms[index].getChain() << " " << Atoms[index].getIndexOrg() << " "<< Atoms[index].getChainId()  << " " << Atoms[index].getResidue() <<  std::endl;	    
-	    if (maxindex < index){
-	      maxindex = index;
-	    }	      
-	    CA_flag=1;
-	  }
-	  if (atom.name == "CB" && elementname == "C" && CA_flag == 1){
-	    Atoms[index].setX(atom.pos.x);
-	    Atoms[index].setY(atom.pos.y);
-	    Atoms[index].setZ(atom.pos.z);
+      for (gemmi::ResidueSpan& sub : chain.subchains()){
+	if (sub.length() <= PDPParameters::MIN_CHAIN_LENGTH){
+	  continue;
+	}
+	std::string sub_id = sub.subchain_id();
+	int chain_has_calpha = 0;
+	for (gemmi::Residue& residue : sub) {
+	  CA_flag=0;
+	  for (const gemmi::Atom &atom : residue.atoms) {
+	    std::string elementname = atom.element.name();
+	    if (atom.name == "CA" && elementname == "C"){
+	      index += 1;
+	      Atoms[index].setX(atom.pos.x);
+	      Atoms[index].setY(atom.pos.y);
+	      Atoms[index].setZ(atom.pos.z);
+	      Atoms[index].setChain(sub_id);	  
+	      resi=stoi(residue.label_seq.str());
+	      Atoms[index].setIndexOrg(resi);
+	      Atoms[index].setChainId(chainid);
+	      Atoms[index].setResidue(residue.name);
+	      if (PDPParameters::VERBOSE){
+		std::cout  << "[Structure.cpp] " << index << "-th Representative atom coordinate was taken from: " <<  Atoms[index].getChain() << " " << Atoms[index].getIndexOrg() << " "<< Atoms[index].getChainId()  << " " << Atoms[index].getResidue() <<  std::endl;
+	      }
+	      if (maxindex < index){
+		maxindex = index;
+	      }	      
+	      CA_flag=1;
+	      chain_has_calpha = 1;
+	    }
+	    if (atom.name == "CB" && elementname == "C" && CA_flag == 1){
+	      if (PDPParameters::VERBOSE){
+		std::cout  << "[Structure.cpp] " << index << "-th Representative atom coordinate was updated to C-beta from: "<<  Atoms[index].getChain() << " " << Atoms[index].getIndexOrg() << " "<< Atoms[index].getChainId()  << " " << Atoms[index].getResidue() <<  std::endl;
+	      }
+	      Atoms[index].setX(atom.pos.x);
+	      Atoms[index].setY(atom.pos.y);
+	      Atoms[index].setZ(atom.pos.z);
+	    }
 	  }
 	}
-
+	if (chain_has_calpha==1){
+	  this->tailofchain.push_back(index);
+	  chainid++;
+	}
       }
-      if(CA_flag==1){
-	this->tailofchain.push_back(index);
-      }
-      chainid++;
-
     }
   }
   PDPParameters::maxIndex = maxindex;

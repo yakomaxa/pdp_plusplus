@@ -30,18 +30,15 @@ PDPDistanceMatrix GetDistanceMatrix::getDistanceMatrix(std::vector<Atom>& protei
   float dy=0;
   float dz=0;
   
-  std::vector<std::vector<int>> dist(PDPParameters::MAXLEN+5,
-				     std::vector<int>(PDPParameters::MAXLEN+5));
+  //std::vector<std::vector<int>> dist(PDPParameters::MAXLEN+5,
+  //				     std::vector<int>(PDPParameters::MAXLEN+5));
+  std::vector<std::vector<int>> dist(PDPParameters::MAXLEN,std::vector<int>(PDPParameters::MAXLEN));
   int i,j;
   float d,dt1,dt2,dt3,dt4;
   int nc=0;  
 
   if (PDPParameters::VERBOSE){
-    std::cerr << protein.size() << " protein.len < MAXLEN " << PDPParameters::MAXLEN << "\n";
-    if((int)protein.size() >= PDPParameters::MAXLEN) {
-      std::cerr << protein.size() << " protein.len > MAXLEN " << PDPParameters::MAXLEN << "\n";
-
-    }
+      std::cout << "[GetDistanceMatrix.cpp] protein.size() = " << protein.size() << " and PDPParameters::MAXLEN = " << PDPParameters::MAXLEN << std::endl; 
   }
   
   dt1=81;
@@ -121,12 +118,12 @@ PDPDistanceMatrix GetDistanceMatrix::getDistanceMatrix(std::vector<Atom>& protei
 	  dist[i][j]+=4;
 	  dist[j][i]+=4;
 	  if (PDPParameters::VERBOSE){
-	    printf("COND1: %d %d %d\n",i,j,dist[i][j]);
-
-	    printf("COND1_diff1: %d %d %d\n",i-1,j-1,dist[i-1][j-1]);
-	    printf("COND1_diff2: %d %d %d\n",i+1,j+1,dist[i+1][j+1]);
-	    printf("COND1_diff3: %d %d %d\n",i-1,j+1,dist[i-1][j+1]);
-	    printf("COND1_diff4: %d %d %d\n",i+1,j-1,dist[i+1][j-1]);
+	    printf("[GetDistanceMatrix.cpp] RANGE CHECK around i=%d j=%d\n",i,j);
+	    printf("[GetDistanceMatrix.cpp] COND1: i=%d j=%d dist=%d\n",i,j,dist[i][j]);
+	    printf("[GetDistanceMatrix.cpp] COND1_diff1: i-1=%d j-1=%d dist=%d\n",i-1,j-1,dist[i-1][j-1]);
+	    printf("[GetDistanceMatrix.cpp] COND1_diff2: i+1=%d j+1=%d dist=%d\n",i+1,j+1,dist[i+1][j+1]);
+	    printf("[GetDistanceMatrix.cpp] COND1_diff3: i-1=%d j+1=%d dist=%d\n",i-1,j+1,dist[i-1][j+1]);
+	    printf("[GetDistanceMatrix.cpp] COND1_diff4: i+1=%d j-1=%d dist=%d\n",i+1,j-1,dist[i+1][j-1]);
 					    
 	    //	    [i-1][j-1]
 	    //	    [i+1][j+1]
@@ -140,12 +137,12 @@ PDPDistanceMatrix GetDistanceMatrix::getDistanceMatrix(std::vector<Atom>& protei
 	    dist[i][j]+=4;
 	    dist[j][i]+=4;
 	    if (PDPParameters::VERBOSE){
-	      printf("COND3: %d %d %d\n",i,j,dist[i][j]);
-
-	      printf("COND3_diff1: %d %d %d\n",i-3,j-3,dist[i-3][j-3]);
-	      printf("COND3_diff2: %d %d %d\n",i+3,j+3,dist[i+3][j+3]);
-	      printf("COND3_diff3: %d %d %d\n",i-3,j+3,dist[i-3][j+3]);
-	      printf("COND3_diff4: %d %d %d\n",i+3,j-3,dist[i+3][j-3]);
+	      printf("[GetDistanceMatrix.cpp] RANGE CHECK around i=%d j=%d\n",i,j);
+	      printf("[GetDistanceMatrix.cpp] COND3: %d %d %d\n",i,j,dist[i][j]);
+	      printf("[GetDistanceMatrix.cpp] COND3_diff1: i-3=%d j-3=%d dist=%d\n",i-3,j-3,dist[i-3][j-3]);
+	      printf("[GetDistanceMatrix.cpp] COND3_diff2: i+3=%d j+3=%d dist=%d\n",i+3,j+3,dist[i+3][j+3]);
+	      printf("[GetDistanceMatrix.cpp] COND3_diff3: i-3=%d j+3=%d dist=%d\n",i-3,j+3,dist[i-3][j+3]);
+	      printf("[GetDistanceMatrix.cpp] COND3_diff4: i+3=%d j-3=%d dist=%d\n",i+3,j-3,dist[i+3][j-3]);
 	    }
 	  }
 	  else if(i>3&&j<(int)protein.size()-3) {
@@ -156,27 +153,28 @@ PDPDistanceMatrix GetDistanceMatrix::getDistanceMatrix(std::vector<Atom>& protei
 	      dist[i][j]+=4;
 	      dist[j][i]+=4;
 	      if (PDPParameters::VERBOSE){
-		printf("COND4: %d %d %d\n",i,j,dist[i][j]);
-		printf("COND4_diff1: %d %d %d\n",i-3,j-3,dist[i-3][j-3]);
-		printf("COND4_diff2: %d %d %d\n",i-3,j-4,dist[i-3][j-4]);
-		printf("COND4_diff3: %d %d %d\n",i-4,j-3,dist[i-4][j-3]);
-		printf("COND4_diff4: %d %d %d\n",i-4,j-4,dist[i-4][j-4]);
+		printf("[GetDistanceMatrix.cpp] RANGE CHECK around i=%d j=%d\n",i,j);
+		printf("[GetDistanceMatrix.cpp] COND4: i=%d j=%d dist=%d\n",i,j,dist[i][j]);
+		printf("[GetDistanceMatrix.cpp] COND4_diff1: i-3=%d j-3=%d dist=%d\n",i-3,j-3,dist[i-3][j-3]);
+		printf("[GetDistanceMatrix.cpp] COND4_diff2: i-3=%d j-4=%d dist=%d\n",i-3,j-4,dist[i-3][j-4]);
+		printf("[GetDistanceMatrix.cpp] COND4_diff3: i-4=%d j-3=%d dist=%d\n",i-4,j-3,dist[i-4][j-3]);
+		printf("[GetDistanceMatrix.cpp] COND4_diff4: i-4=%d j-4=%d dist=%d\n",i-4,j-4,dist[i-4][j-4]);
 
-		printf("COND4_diff5: %d %d %d\n",i+4,j+4,dist[i+4][j+4]);
-		printf("COND4_diff6: %d %d %d\n",i+4,j+3,dist[i+4][j+3]);
-		printf("COND4_diff7: %d %d %d\n",i+3,j+3,dist[i+3][j+3]);
-		printf("COND4_diff8: %d %d %d\n",i+3,j+4,dist[i+3][j+4]);
+		printf("[GetDistanceMatrix.cpp] COND4_diff5: i+4=%d j+4=%d dist=%d\n",i+4,j+4,dist[i+4][j+4]);
+		printf("[GetDistanceMatrix.cpp] COND4_diff6: i+4=%d j+3=%d dist=%d\n",i+4,j+3,dist[i+4][j+3]);
+		printf("[GetDistanceMatrix.cpp] COND4_diff7: i+3=%d j+3=%d dist=%d\n",i+3,j+3,dist[i+3][j+3]);
+		printf("[GetDistanceMatrix.cpp] COND4_diff8: i+3=%d j+4=%d dist=%d\n",i+3,j+4,dist[i+3][j+4]);
 
-		printf("COND4_diff9: %d %d %d\n",i-4,j+4,dist[i-4][j+4]);
-		printf("COND4_diff10: %d %d %d\n",i-4,j+3,dist[i-4][j+3]);
-		printf("COND4_diff11: %d %d %d\n",i-3,j+4,dist[i-3][j+4]);
-		printf("COND4_diff12: %d %d %d\n",i-3,j+3,dist[i-3][j+3]);
+		printf("[GetDistanceMatrix.cpp] COND4_diff9: i-4=%d j-4=%d dist=%d\n",i-4,j+4,dist[i-4][j+4]);
+		printf("[GetDistanceMatrix.cpp] COND4_diff10: i-4=%d j+3=%d dist=%d\n",i-4,j+3,dist[i-4][j+3]);
+		printf("[GetDistanceMatrix.cpp] COND4_diff11: i-3=%d j+4=%d dist=%d\n",i-3,j+4,dist[i-3][j+4]);
+		printf("[GetDistanceMatrix.cpp] COND4_diff12: i-3=%d j+3=%d dist=%d\n",i-3,j+3,dist[i-3][j+3]);
 
 
-		printf("COND4_diff13: %d %d %d\n",i+4,j-4,dist[i+4][j-4]);
-		printf("COND4_diff14: %d %d %d\n",i+4,j-3,dist[i+4][j-3]);
-		printf("COND4_diff15: %d %d %d\n",i+3,j-4,dist[i+3][j-4]);
-		printf("COND4_diff16: %d %d %d\n",i+3,j-3,dist[i+3][j-3]);
+		printf("[GetDistanceMatrix.cpp] COND4_diff13: i+4=%d j-4=%d dist=%d\n",i+4,j-4,dist[i+4][j-4]);
+		printf("[GetDistanceMatrix.cpp] COND4_diff14: i+4=%d j-3=%d dist=%d\n",i+4,j-3,dist[i+4][j-3]);
+		printf("[GetDistanceMatrix.cpp] COND4_diff15: i+3=%d j-4=%d dist=%d\n",i+3,j-4,dist[i+3][j-4]);
+		printf("[GetDistanceMatrix.cpp] COND4_diff16: i+3=%d j-3=%d dist=%d\n",i+3,j-3,dist[i+3][j-3]);
 
 	       
 	      }

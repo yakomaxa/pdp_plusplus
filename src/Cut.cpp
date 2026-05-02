@@ -179,7 +179,7 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
       contact_density[k]=(double)contacts[k]/(double)max_contacts[k];
       
       if(verbose){
-	printf("data %i  %i      %i      %f      %f      %i      %i      %f\n",k,size1,size2,x,y,max_contacts[k],contacts[k],contact_density[k]);
+	printf("[Cut.cpp] data %i  %i      %i      %f      %f      %i      %i      %f\n",k,size1,size2,x,y,max_contacts[k],contacts[k],contact_density[k]);
       }
       
       if(from==0){
@@ -212,17 +212,17 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
   if (!size0==0){ // K.S.: Added this to avoid 0-division.
     average_density/=size0;
     if(verbose){
-      printf("Trying to cut domain of size %d having %d segments and  average cont_density %f\n",dom.getSize(),dom.getNseg(),average_density);
+      printf("[Cut.cpp] Trying to cut domain of size %d having %d segments and  average cont_density %f\n",dom.getSize(),dom.getNseg(),average_density);
       for(int kseg=0;kseg<dom.getNseg();kseg++){
 	//to=dom.getSegmentAtPos(iseg).getTo();
-	printf("Trying segment %d from %d to %d\n",kseg,dom.getSegmentAtPos(kseg).getFrom(),dom.getSegmentAtPos(kseg).getTo());
+	printf("[Cut.cpp] Trying segment %d from %d to %d\n",kseg,dom.getSegmentAtPos(kseg).getFrom(),dom.getSegmentAtPos(kseg).getTo());
       }
     }
   }else{
     val.AD = 123456;
     if(verbose){
-      printf("could have had NaN because size0 == 0, forced to exit!\n");
-      printf("at the end of cut: s_min %f CUTOFF %f site_min %d *site2 %d\n",val.s_min,PDPParameters::CUT_OFF_VALUE,site_min,val.site2);
+      printf("[Cut.cpp] Could have had NaN because size0 == 0, forced to exit!\n");
+      printf("[Cut.cpp] At the end of cut: s_min %f CUTOFF %f site_min %d *site2 %d\n",val.s_min,PDPParameters::CUT_OFF_VALUE,site_min,val.site2);
     }
     return -1;
   }
@@ -233,21 +233,21 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
   val.AD = average_density;
   
   if(verbose){
-    printf("AD=%f\n", average_density);
+    printf("[ClusterDomain.cpp] average_density=%f\n", average_density);
   }
 
   if (!val.AD == 0){ // K.S.: Added this to avoid 0-division.
     val.s_min/=val.AD;
   }else{
     if(verbose){
-      printf("could have had NaN because val.AD  == 0, forced to exit!\n");
-      printf("at the end of cut: s_min %f CUTOFF %f site_min %d *site2 %d\n",val.s_min,PDPParameters::CUT_OFF_VALUE,site_min,val.site2);
+      printf("[Cut.cpp] Could have had NaN because val.AD  == 0, forced to exit!\n");
+      printf("[Cut.cpp] At the end of cut: s_min %f CUTOFF %f site_min %d *site2 %d\n",val.s_min,PDPParameters::CUT_OFF_VALUE,site_min,val.site2);
     }
     return -1;
   }
   
   if(verbose){
-    printf("after single cut: s_min = %f site_min = %d\n",val.s_min,site_min);
+    printf("[Cut.cpp] After single cut: s_min = %f site_min = %d\n",val.s_min,site_min);
   }
   
   nc=0;
@@ -431,7 +431,7 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
     
     if(verbose){
       std::cout << max_contacts[nc] << std::endl;
-      printf(" double cut: %i %s %i %i c=%d mc=%d x=%f y=%f s1=%i s2=%i cd=%f cd/ad=%f\n",l,ca[iclose[l]].getResidue().c_str(),iclose[l],jclose[l],contacts[nc],max_contacts[nc],x,y,size11,size22,contact_density[nc],contact_density[nc]/val.AD);
+      printf("[Cut.cpp] double cut: %i %s %i %i c=%d mc=%d x=%f y=%f s1=%i s2=%i cd=%f cd/ad=%f\n",l,ca[iclose[l]].getResidue().c_str(),iclose[l],jclose[l],contacts[nc],max_contacts[nc],x,y,size11,size22,contact_density[nc],contact_density[nc]/val.AD);
     }
     
     if((contact_density[nc]/val.AD+PDPParameters::DBL)<val.s_min&&contact_density[nc]/val.AD+PDPParameters::DBL<PDPParameters::CUT_OFF_VALUE2) {
@@ -448,7 +448,7 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
   }
   val.first_cut=false;
   if(verbose){
-    printf("at the end of cut: s_min %f CUTOFF %f site_min %d *site2 %d\n",val.s_min,PDPParameters::CUT_OFF_VALUE,site_min,val.site2);
+    printf("[Cut.cpp] At the end of cut: s_min %f CUTOFF %f site_min %d *site2 %d\n",val.s_min,PDPParameters::CUT_OFF_VALUE,site_min,val.site2);
   }
   if(val.s_min > PDPParameters::CUT_OFF_VALUE){
     return -1;

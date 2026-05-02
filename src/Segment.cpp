@@ -33,16 +33,16 @@ bool Segment::operator==(const Segment& other) const {
 bool Segment::operator!=(const Segment& other) const { return !(*this == other); }
 
 bool Segment::operator<(const Segment& other) const {
-  int tmp1 = chainid_ * PDPParameters::maxIndex * 10;
-  int tmp2 = other.chainid_ * PDPParameters::maxIndex * 10;
+  int tmp1 = chainid_ * PDPParameters::maxIndex;
+  int tmp2 = other.chainid_ * PDPParameters::maxIndex;
   if ( from_ + tmp1 != other.from_ + tmp2 ) {
     if (PDPParameters::VERBOSE){
-      printf("A = %i, B = %i\n", from_ + tmp1,other.from_ + tmp2);
+      printf("[Segment.cpp] Segment comparison extended for multiple chain by offsetting terminal indexes (\"from\"-based evaluation); chainID = %i vs %i : from_ + chainid_ * PDPParameters::maxIndex = %i, from_ + other.chainid_ * PDPParameters::maxIndex  = %i\n", chainid_, other.chainid_, from_ + tmp1,other.from_ + tmp2);
     }
     return (from_ + tmp1) < (other.from_ + tmp2);
   }
   if (PDPParameters::VERBOSE){
-    printf("A = %i, B = %i\n", to_ + tmp1, other.to_ + tmp2);
+    printf("[Segment.cpp] Segment comparison multiple chain by offsetting terminal indexes (\"to\"-based evaluation, as \"from\" was identical); chainID = %i vs %i : to_ + chainid_ * PDPParameters::maxIndex  = %i, to_ + other.chainid_ * PDPParameters::maxIndex = %i\n", chainid_, other.chainid_, to_ + tmp1, other.to_ + tmp2);
   }
   return (to_ + tmp1) < (other.to_ + tmp2);
 }
