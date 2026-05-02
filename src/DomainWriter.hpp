@@ -7,20 +7,29 @@
 #include "Structure.hpp"
 #include "Domain.hpp"
 
-enum class OutFormat { PDB, CIF };
-
 void listdomains(std::vector<Domain>& domains);
 void listdomains(std::vector<Domain>& domains, const std::string& filename);
 
 void writeDomainFiles(std::vector<Domain>& domains,
+		      std::vector<Domain>& naive_domains,
                       const Structure& s,
                       const std::string& prefix,
-                      OutFormat format,
+                      std::vector<std::string> formats,
                       const std::string& input_path = "",
                       bool include_path = false);
 
 void writeDomainJson(std::vector<Domain>& naive_domains,
                      std::vector<Domain>& cleaned_domains,
                      const std::string& prefix);
+
+class DomainSeq {
+public:
+  gemmi::Structure structure;
+  std::string sequence;
+  void setValues(gemmi::Structure s, std::string n){
+    structure = s;
+    sequence = n;
+  }
+};
 
 #endif /* DomainWriter_hpp */

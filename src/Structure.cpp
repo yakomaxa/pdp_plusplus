@@ -51,9 +51,12 @@ Structure::Structure(std::string filename){
       break;
     }
     for (gemmi::Chain& chain : model.chains) {
+      int resi = 1;
       for (gemmi::Residue& residue : chain.residues) {
 	if (!is_integer(residue.label_seq.str())){
-	  residue.label_seq = stoi(residue.seqid.str()) ;
+	  //residue.label_seq = stoi(residue.seqid.str()) ;
+	  residue.label_seq = resi;
+	  resi += 1;
 	}
 	for (gemmi::Atom &atom : residue.atoms) {
 	  std::string elementname = atom.element.name();
@@ -93,23 +96,26 @@ std::vector<Atom> Structure::getRepresentativeAtomArray(){
 	    resi=stoi(residue.label_seq.str());
 	    Atoms[index].setIndexOrg(resi);
 	    Atoms[index].setChainId(chainid);
-	    Atoms[index].setResidue(residue.name);	    
+	    Atoms[index].setResidue(residue.name);
+	    ///std::cout << Atoms[index].getX() << " " << Atoms[index].getY()  << " "<<  Atoms[index].getChain() << " " << Atoms[index].getIndexOrg() << " "<< Atoms[index].getChainId()  << " " << Atoms[index].getResidue() <<  std::endl;	    
 	    if (maxindex < index){
 	      maxindex = index;
 	    }	      
 	    CA_flag=1;
 	  }
-	  if (atom.name == "CB" && elementname == "C"){
+	  if (atom.name == "CB" && elementname == "C" && CA_flag == 1){
 	    Atoms[index].setX(atom.pos.x);
 	    Atoms[index].setY(atom.pos.y);
 	    Atoms[index].setZ(atom.pos.z);
 	  }
 	}
+
       }
       if(CA_flag==1){
 	this->tailofchain.push_back(index);
       }
       chainid++;
+
     }
   }
   PDPParameters::maxIndex = maxindex;

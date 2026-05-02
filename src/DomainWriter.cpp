@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <chrono>
 #include <ctime>
+#include <iostream>
 
 #define GEMMI_WRITE_IMPLEMENTATION
 #include "./gemmi/to_pdb.hpp"
@@ -31,38 +32,55 @@ static std::string makeTimestamp() {
   return std::string(buf);
 }
 
-static gemmi::Structure filterDomainStructure(Domain& dom,
+static DomainSeq filterDomainStructure(Domain& dom,
                                               const gemmi::Structure& structure) {
+
   gemmi::Structure out_struct = structure;
-  if (out_struct.models.size() > 1)
-    out_struct.models.erase(out_struct.models.begin() + 1, out_struct.models.end());
-
-  for (gemmi::Chain& chain : out_struct.models[0].chains) {
-    std::vector<std::pair<int,int>> ranges;
-    for (int si = 0; si < dom.getNseg(); si++) {
-      Segment& seg = dom.getSegmentAtPos(si);
-      if (seg.getChain() == chain.name)
-        ranges.emplace_back(seg.getFromOrg(), seg.getToOrg());
-    }
-    chain.residues.erase(
-      std::remove_if(chain.residues.begin(), chain.residues.end(),
-        [&](const gemmi::Residue& res) {
-          int seqid = std::stoi(res.label_seq.str());
-          for (auto& [from, to] : ranges)
-            if (seqid >= from && seqid <= to) return false;
-          return true;
-        }),
-      chain.residues.end());
+  out_struct.models.clear();
+  DomainSeq out_domain;
+  if (structure.models.empty()){
+    out_domain.setValues(out_struct,"");
+    return out_domain;
   }
+  std::string fasta;
+  gemmi::Model out_model = structure.models[0];
+  out_model.chains.clear();
+  
+  for (int si = 0; si < dom.getNseg(); si++) {
+    Segment& seg = dom.getSegmentAtPos(si);
+    for (const gemmi::Chain& chain : structure.models[0].chains) {
+      gemmi::ConstResidueSpan polymer = chain.get_polymer();
+      if (polymer.empty()){
+	continue;
+      }
+      if (seg.getChain() == chain.name){
+	gemmi::Chain out_chain = chain;
+	out_chain.residues.clear();
+	out_chain.name = chain.name;
+	for (const gemmi::Residue& res : chain.residues) {
+	  int seqid = std::stoi(res.label_seq.str());
+	  if (seqid >= seg.getFromOrg() && seqid <= seg.getToOrg()){
+	    out_chain.residues.push_back(res);
+	  }
+	}
+	gemmi::ConstResidueSpan out_polymer = out_chain.get_polymer();
+	if (!out_polymer.empty()){
+	  std::string seq = gemmi::make_one_letter_sequence(out_polymer);
+	  fasta += ">chain_" + chain.name + "_segment_" + std::to_string(si) + "\n" + seq + "\n";
+	}
 
-  out_struct.models[0].chains.erase(
-    std::remove_if(out_struct.models[0].chains.begin(),
-                   out_struct.models[0].chains.end(),
-                   [](const gemmi::Chain& c) { return c.residues.empty(); }),
-    out_struct.models[0].chains.end());
-
-  return out_struct;
+	if (!out_chain.residues.empty()){
+	  out_model.chains.push_back(std::move(out_chain));
+	}
+      }
+    }
+  }
+  out_struct.models.push_back(std::move(out_model));
+  // set domain container
+  out_domain.setValues(out_struct, fasta);
+  return out_domain;
 }
+
 
 void listdomains(std::vector<Domain>& domains) {
   int i = -1;
@@ -110,63 +128,95 @@ static const std::vector<std::string> PDP_TAGS = {
   "source_path"
 };
 
-
 void writeDomainFiles(std::vector<Domain>& domains,
+		      std::vector<Domain>& naive_domains,
                       const Structure& s,
                       const std::string& prefix,
-                      OutFormat format,
+                      const std::vector<std::string> OutFormats,
                       const std::string& input_path,
-                      bool include_path) {
+                      bool include_path
+		      ) {
   const std::string timestamp = makeTimestamp();
   const std::string source_id = getSourceId(s.structure);
   const int total = (int)domains.size();
 
   for (int di = 0; di < total; di++) {
-    gemmi::Structure out_struct = filterDomainStructure(domains[di], s.structure);
+    //gemmi::Structure out_struct = filterDomainStructure(domains[di], s.structure);
+    DomainSeq output = filterDomainStructure(domains[di], s.structure);
+    gemmi::Structure out_struct =  output.structure;
+    std::string out_sequence =  output.sequence;
+    //std::cout << out_sequence << std::endl;
+    
     const int domain_num = di + 1;
 
-    std::string ext = (format == OutFormat::CIF) ? ".cif" : ".pdb";
-    std::string outname = prefix + "_domain" + std::to_string(domain_num) + ext;
-    std::ofstream out(outname);
-    if (!out) {
-      std::cerr << "Cannot open output file: " << outname << "\n";
-      continue;
-    }
+    for (std::string format: OutFormats){
+      std::string ext = (format == "CIF") ? ".cif" :
+	(format == "PDB") ? ".pdb" :
+	(format == "JSON") ? ".json" :
+	(format == "FASTA") ? ".fasta" :
+	".txt";
+      std::string outname = prefix + "_domain" + std::to_string(domain_num) + ext;      
+      if (format == "CIF") {
+	std::ofstream out(outname);
+	if (!out) {
+	  std::cerr << "Cannot open output file: " << outname << "\n";
+	  continue;
+	}
+	gemmi::cif::Document doc;
+	doc.blocks.resize(1);
+	gemmi::cif::Block& block = doc.blocks[0];
+	block.name = source_id + "_domain" + std::to_string(domain_num);
 
-    if (format == OutFormat::CIF) {
-      gemmi::cif::Document doc;
-      doc.blocks.resize(1);
-      gemmi::cif::Block& block = doc.blocks[0];
-      block.name = source_id + "_domain" + std::to_string(domain_num);
+	const auto& existing_rows = s.pdp_rows;
+	int ordinal = (int)existing_rows.size() + 1;
+	
+	std::vector<std::string> new_row = {
+	  std::to_string(ordinal),
+	  source_id,
+	  std::to_string(domain_num),
+	  std::to_string(total),
+	  gemmi::cif::quote(timestamp),
+	  SOFTWARE_NAME,
+	  SOFTWARE_VERSION,
+	  "\"TODO\"",
+	  include_path ? gemmi::cif::quote(input_path) : "?"
+	};
+	
+	gemmi::cif::Loop& pdp_loop = block.init_loop("_pdp.", PDP_TAGS);
+	for (auto& row : existing_rows){
+	  pdp_loop.add_row(row);
+	}
+	pdp_loop.add_row(new_row);
+	
+	gemmi::MmcifOutputGroups groups(false);
+	groups.atoms     = true;
+	groups.group_pdb = true;
+	gemmi::update_mmcif_block(out_struct, block, groups);
+	
+	gemmi::cif::write_cif_to_stream(out, doc);
+      }
+      
+      if (format == "PDB") {
+	std::ofstream out(outname);
+	if (!out) {
+	  std::cerr << "Cannot open output file: " << outname << "\n";
+	  continue;
+	}
+	gemmi::write_minimal_pdb(out_struct, out);
+      }
+      
+      if (format == "FASTA") {
+	std::ofstream out(outname);
+	if (!out) {
+	  std::cerr << "Cannot open output file: " << outname << "\n";
+	  continue;
+	}
+	out << out_sequence << std::endl;
+      }
 
-      const auto& existing_rows = s.pdp_rows;
-      int ordinal = (int)existing_rows.size() + 1;
-
-      std::vector<std::string> new_row = {
-        std::to_string(ordinal),
-        source_id,
-        std::to_string(domain_num),
-        std::to_string(total),
-        gemmi::cif::quote(timestamp),
-        SOFTWARE_NAME,
-        SOFTWARE_VERSION,
-        "\"TODO\"",
-        include_path ? gemmi::cif::quote(input_path) : "?"
-      };
-
-      gemmi::cif::Loop& pdp_loop = block.init_loop("_pdp.", PDP_TAGS);
-      for (auto& row : existing_rows)
-        pdp_loop.add_row(row);
-      pdp_loop.add_row(new_row);
-
-      gemmi::MmcifOutputGroups groups(false);
-      groups.atoms     = true;
-      groups.group_pdb = true;
-      gemmi::update_mmcif_block(out_struct, block, groups);
-
-      gemmi::cif::write_cif_to_stream(out, doc);
-    } else {
-      gemmi::write_minimal_pdb(out_struct, out);
+      if (format == "JSON") {
+	writeDomainJson(naive_domains, domains, prefix);
+      }
     }
   }
 }
