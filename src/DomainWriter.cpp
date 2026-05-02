@@ -71,6 +71,11 @@ static DomainSeq filterDomainStructure(Domain& dom,
 	  if (!polymer.empty()){
 	    std::string seq = gemmi::make_one_letter_sequence(polymer);
 	    fasta += ">auth_asym_id=" + chain.name + " segment=" + std::to_string(si) + " start:auth_seq_id=" + std::to_string(seg.getFromOrg()) + " end:auth_seq_id=" + std::to_string(seg.getToOrg())  + "\n" + seq + "\n";
+
+	  if (!out_chain.residues.empty()){
+	    out_model.chains.push_back(std::move(out_chain));
+	  }
+
 	  }
 	}else{
 	  for (gemmi::ResidueSpan& sub : chain.subchains()){
