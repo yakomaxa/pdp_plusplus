@@ -45,7 +45,10 @@ Structure::Structure(std::string filename){
     this->structure = gemmi::read_structure(inputfile, gemmi::CoorFormat::Pdb);
     PDPParameters::INPUT_FILETYPE="pdb";    
   }
-
+  if (PDPParameters::VERBOSE){
+    std::cout << "[Structure.cpp] The input file type was recognized as " << PDPParameters::INPUT_FILETYPE << std::endl;
+  }
+ 
   this->numResidues = 0;
   int n_model = 0;
   for (gemmi::Model& model : this->structure.models){
@@ -64,10 +67,11 @@ Structure::Structure(std::string filename){
 	}
 
 	//int resi = 1;
+	int num_calpha_of_chain = 0;
 	for (gemmi::Residue& residue : sub) {
 	  if (!is_integer(residue.label_seq.str())){
 	    if (PDPParameters::VERBOSE){
-	      std::cout << "[Structure.cpp]: As label_seq =" <<  residue.label_seq.str() << " for the residue with label_asym_id=" << sub_id << " and auth_asym_id=" << chain.name  <<  " seems not to be integer, residue.seqid = " << residue.seqid.str() << " is copied to label_seq (i.e. label_seq_id for subchain)" << std::endl;
+	      std::cout << "[Structure.cpp]: As label_seq =" <<  residue.label_seq.str() << " for the residue with residue.name=" << residue.name << " label_asym_id=" << sub_id << " and auth_asym_id=" << chain.name  <<  " seems not to be integer, residue.seqid = " << residue.seqid.str() << " is copied to label_seq (i.e. label_seq_id for subchain)" << std::endl;
 	    }	  	    
 	    residue.label_seq = stoi(residue.seqid.str()) ;
 	    //residue.label_seq = resi;
@@ -76,9 +80,14 @@ Structure::Structure(std::string filename){
 	  for (const gemmi::Atom &atom : residue.atoms) {
 	    std::string elementname = atom.element.name();
 	    if (atom.name == "CA" && elementname == "C"){
-	      this->numResidues += 1;
+	      num_calpha_of_chain  += 1;
 	    }
 	  }
+	}
+	if (num_calpha_of_chain <= PDPParameters::MIN_CHAIN_LENGTH){
+	  std::cout << "[Structure.cpp]: Subchain " << sub_id << " was not considered in residue counter as it's shorter than or equal to " << PDPParameters::MIN_CHAIN_LENGTH << std::endl;
+	}else{
+	  this->numResidues += num_calpha_of_chain;
 	}
       }
     }
@@ -104,6 +113,18 @@ std::vector<Atom> Structure::getRepresentativeAtomArray(){
 	  continue;
 	}
 	std::string sub_id = sub.subchain_id();
+	int num_calpha_of_chain = 0;
+	for (gemmi::Residue& residue : sub) {
+	  for (const gemmi::Atom &atom : residue.atoms) {
+	    std::string elementname = atom.element.name();
+	    if (atom.name == "CA" && elementname == "C"){
+	      num_calpha_of_chain += 1;
+	    }
+	  }
+	}
+	if (num_calpha_of_chain <= PDPParameters::MIN_CHAIN_LENGTH){
+	  continue;
+	}
 	int chain_has_calpha = 0;
 	for (gemmi::Residue& residue : sub) {
 	  CA_flag=0;

@@ -238,7 +238,7 @@ void writeDomainFiles(std::vector<Domain>& domains,
 	  std::cerr << "Cannot open output file: " << outname << "\n";
 	  continue;
 	}
-	out << out_sequence << std::endl;
+	out << out_sequence;
       }
 
       if (format == "JSON") {
