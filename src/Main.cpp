@@ -20,6 +20,7 @@ struct OutFlags {
   bool cif          = false;
   bool pml          = false;
   bool json         = false;
+  bool fasta         = false;
   bool include_path = false;
 };
 
@@ -64,7 +65,7 @@ static void mergeAdjacentSegments(std::vector<Domain>& domains) {
 }
 
 static void printUsage(const char* prog) {
-  std::cerr << "Usage: " << prog << " <input> [-o prefix] [-f pdb|cif|pml|json|all ...] [-s naive|removed] [--include-path] [-v|-vv]\n";
+  std::cerr << "Usage: " << prog << " <input> [-o prefix] [-f pdb|cif|pml|json|fasta|all ...] [-s naive|removed] [--include-path] [-v|-vv]\n";
   std::cerr << "  -v              print domain listing to stdout\n";
   std::cerr << "  -vv             print computation details to stdout (exclusive with -v)\n";
   std::cerr << "  --include-path  include source file path in _pdp.source_path (CIF output)\n";
@@ -102,6 +103,7 @@ int main(int argc, char* argv[]) {
         else if (fmt == "cif")  outflags.cif  = true;
         else if (fmt == "pml")  outflags.pml  = true;
         else if (fmt == "json") outflags.json = true;
+	else if (fmt == "fasta") outflags.fasta = true;
         else if (fmt == "all")  outflags.pdb = outflags.cif = outflags.pml = outflags.json = true;
         else {
           std::cerr << "Unknown format '" << fmt << "'. Use pdb, cif, pml, json, or all.\n";
@@ -134,7 +136,7 @@ int main(int argc, char* argv[]) {
 
   if (PDPParameters::VERBOSE) printf("---------Reading structure\n");
   Structure s(filename);
-
+  
   if (s.numResidues < 10){
     if (verbosity >= 1){
       std::cout << "PDP skipped " <<  argv[1] << " as this structure has C-alpha atoms less than 10." << std::endl;
@@ -146,11 +148,11 @@ int main(int argc, char* argv[]) {
 
   PDPParameters param;
   param.setMAXLEN(s.numResidues);
-
+  
   if (PDPParameters::VERBOSE) printf("---------Get Repr atoms\n");
   std::vector<Atom> ca = s.getRepresentativeAtomArray();
-  if (PDPParameters::VERBOSE) printf("---------Get Repr atoms Done\n");
 
+  if (PDPParameters::VERBOSE) printf("---------Get Repr atoms Done\n");
   if (PDPParameters::VERBOSE) printf("---------distMat creation\n");
   PDPDistanceMatrix pdpMatrix = GetDistanceMatrix().getDistanceMatrix(ca);
   if (PDPParameters::VERBOSE) printf("---------distMat creation Done\n");
@@ -185,6 +187,8 @@ int main(int argc, char* argv[]) {
 
   resolveOriginalCoords(domains, ca);
 
+
+
   if (verbosity >= 1) listdomains(domains);
 
   mergeAdjacentSegments(domains);
@@ -201,9 +205,22 @@ int main(int argc, char* argv[]) {
   if (outflags.pml) listdomains(domains, outprefix + "_removed.pml");
 
   std::vector<Domain>& dump_domains = (outstage == DomainStage::NAIVE) ? naive_domains : domains;
-  if (outflags.pdb)  writeDomainFiles(dump_domains, s, outprefix, OutFormat::PDB, filename, outflags.include_path);
-  if (outflags.cif)  writeDomainFiles(dump_domains, s, outprefix, OutFormat::CIF, filename, outflags.include_path);
-  if (outflags.json) writeDomainJson(naive_domains, domains, outprefix);
+  std::vector<std::string> formats;
+  if (outflags.pdb){
+    formats.push_back("PDB");
+  }  
+  if (outflags.cif){
+    formats.push_back("CIF");
+      }
+  if (outflags.fasta){ // define fasta later
+    formats.push_back("FASTA");
+  }
+  if (outflags.json){
+    formats.push_back("JSON");
+  }
+  if (formats.size()>0){
+    writeDomainFiles(dump_domains, naive_domains, s, outprefix, formats, filename, outflags.include_path);
+  }
 
   return 0;
 }
