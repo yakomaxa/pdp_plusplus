@@ -8,6 +8,15 @@
 #include "Structure.hpp"
 #include "PDPParameters.hpp"
 
+bool is_integer(const std::string& s) {
+    if (s.empty()) return false;
+    size_t start = (s[0] == '-') ? 1 : 0;    
+    if (start == 1 && s.size() == 1) return false;
+    return std::all_of(s.begin() + start, s.end(), [](unsigned char c) {
+        return std::isdigit(c);
+    });
+}
+
 static std::vector<std::vector<std::string>> extractPdpRows(
     const gemmi::cif::Document& doc) {
   static const int PDP_TAG_COUNT = 9;
@@ -26,34 +35,35 @@ static std::vector<std::vector<std::string>> extractPdpRows(
 
 Structure::Structure(std::string filename){
   gemmi::MaybeGzipped inputfile(filename);
-  gemmi::CoorFormat fmt = gemmi::coor_format_from_ext(inputfile.basepath());
-  if (fmt == gemmi::CoorFormat::Mmcif) {
-    gemmi::cif::Document doc = gemmi::cif::read(std::move(inputfile));
+  gemmi::CoorFormat infileformat = gemmi::coor_format_from_ext(inputfile.basepath());
+  if(infileformat != gemmi::CoorFormat::Unknown){
+    this->structure = gemmi::read_structure(inputfile, infileformat);
+    gemmi::cif::Document doc = gemmi::make_mmcif_document(this->structure);
     this->pdp_rows = extractPdpRows(doc);
-    this->structure = gemmi::make_structure(doc);
-  } else {
-    gemmi::MaybeGzipped inputfile2(filename);
-    this->structure = gemmi::read_structure(
-        inputfile2, fmt == gemmi::CoorFormat::Unknown ? gemmi::CoorFormat::Pdb : fmt);
+  }else{
+    this->structure = gemmi::read_structure(inputfile, gemmi::CoorFormat::Pdb);
   }
-    this->numResidues = 0;
-    int n_model = 0;
-    for (gemmi::Model& model : this->structure.models){
-      n_model += 1;
-      if (n_model > 1){
-	break;
-      }
-      for (gemmi::Chain& chain : model.chains) {
-	for (gemmi::Residue& residue : chain.residues) {
-	  for (gemmi::Atom &atom : residue.atoms) {
-	    std::string elementname = atom.element.name();
-	    if (atom.name == "CA" && elementname == "C"){
-	      this->numResidues += 1;
-	    }
+  this->numResidues = 0;
+  int n_model = 0;
+  for (gemmi::Model& model : this->structure.models){
+    n_model += 1;
+    if (n_model > 1){
+      break;
+    }
+    for (gemmi::Chain& chain : model.chains) {
+      for (gemmi::Residue& residue : chain.residues) {
+	if (!is_integer(residue.label_seq.str())){
+	  residue.label_seq = stoi(residue.seqid.str()) ;
+	}
+	for (gemmi::Atom &atom : residue.atoms) {
+	  std::string elementname = atom.element.name();
+	  if (atom.name == "CA" && elementname == "C"){
+	    this->numResidues += 1;
 	  }
 	}
       }
     }
+  }
 };
 
 std::vector<Atom> Structure::getRepresentativeAtomArray(){
@@ -79,8 +89,8 @@ std::vector<Atom> Structure::getRepresentativeAtomArray(){
 	    Atoms[index].setX(atom.pos.x);
 	    Atoms[index].setY(atom.pos.y);
 	    Atoms[index].setZ(atom.pos.z);
-	    Atoms[index].setChain(chain.name);
-	    resi=stoi(residue.seqid.str());
+	    Atoms[index].setChain(chain.name);	  
+	    resi=stoi(residue.label_seq.str());
 	    Atoms[index].setIndexOrg(resi);
 	    Atoms[index].setChainId(chainid);
 	    Atoms[index].setResidue(residue.name);	    

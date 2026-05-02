@@ -47,7 +47,7 @@ static gemmi::Structure filterDomainStructure(Domain& dom,
     chain.residues.erase(
       std::remove_if(chain.residues.begin(), chain.residues.end(),
         [&](const gemmi::Residue& res) {
-          int seqid = std::stoi(res.seqid.str());
+          int seqid = std::stoi(res.label_seq.str());
           for (auto& [from, to] : ranges)
             if (seqid >= from && seqid <= to) return false;
           return true;

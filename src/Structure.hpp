@@ -18,6 +18,8 @@
 #include "./gemmi/gz.hpp"
 #include "./gemmi/cif.hpp"
 #include "./gemmi/util.hpp"
+#include <gemmi/to_mmcif.hpp>
+
 
 class Structure{
 private:
