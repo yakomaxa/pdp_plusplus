@@ -1,6 +1,6 @@
 #ifndef PDPPARAMETERS_H
 #define PDPPARAMETERS_H
-
+#include <string>
 class PDPParameters {
 public:
 
@@ -26,6 +26,10 @@ public:
     static const float CUT_OFF_VALUE1S; /* decide to combine small domains */
     static const float CUT_OFF_VALUE1M; /* decide to combine medium domains */
 
+    static const int MIN_CHAIN_LENGTH;
+    static const int MIN_STRUCT_SIZE;
+    static std::string INPUT_FILETYPE;
+  
     static bool VERBOSE;
 
 

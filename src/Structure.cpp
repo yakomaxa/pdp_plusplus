@@ -36,13 +36,16 @@ static std::vector<std::vector<std::string>> extractPdpRows(
 Structure::Structure(std::string filename){
   gemmi::MaybeGzipped inputfile(filename);
   gemmi::CoorFormat infileformat = gemmi::coor_format_from_ext(inputfile.basepath());
-  if(infileformat != gemmi::CoorFormat::Unknown){
+  if(infileformat == gemmi::CoorFormat::Mmcif || infileformat == gemmi::CoorFormat::Mmjson){
     this->structure = gemmi::read_structure(inputfile, infileformat);
     gemmi::cif::Document doc = gemmi::make_mmcif_document(this->structure);
     this->pdp_rows = extractPdpRows(doc);
-  }else{
+    PDPParameters::INPUT_FILETYPE="pdbx";
+  }else if(infileformat == gemmi::CoorFormat::Pdb){
     this->structure = gemmi::read_structure(inputfile, gemmi::CoorFormat::Pdb);
+    PDPParameters::INPUT_FILETYPE="pdb";    
   }
+
   this->numResidues = 0;
   int n_model = 0;
   for (gemmi::Model& model : this->structure.models){
@@ -60,12 +63,13 @@ Structure::Structure(std::string filename){
 	  continue;
 	}
 
-	int resi = 1;
+	//int resi = 1;
 	for (gemmi::Residue& residue : sub) {
 	  if (!is_integer(residue.label_seq.str())){
-	    //residue.label_seq = stoi(residue.seqid.str()) ;
-	    residue.label_seq = resi;
-	    resi += 1;
+	    std::cout << residue.seqid.str() << std::endl;
+	    residue.label_seq = stoi(residue.seqid.str()) ;
+	    //residue.label_seq = resi;
+	    //resi += 1;
 	  }
 	  for (const gemmi::Atom &atom : residue.atoms) {
 	    std::string elementname = atom.element.name();
@@ -108,8 +112,14 @@ std::vector<Atom> Structure::getRepresentativeAtomArray(){
 	      Atoms[index].setX(atom.pos.x);
 	      Atoms[index].setY(atom.pos.y);
 	      Atoms[index].setZ(atom.pos.z);
-	      Atoms[index].setChain(sub_id);	  
-	      resi=stoi(residue.label_seq.str());
+	      if (PDPParameters::INPUT_FILETYPE == "pdb"){
+		Atoms[index].setChain(chain.name);
+		resi=stoi(residue.seqid.str());
+	      }else{
+		Atoms[index].setChain(sub_id);
+		resi=stoi(residue.label_seq.str());
+	      }
+
 	      Atoms[index].setIndexOrg(resi);
 	      Atoms[index].setChainId(chainid);
 	      Atoms[index].setResidue(residue.name);

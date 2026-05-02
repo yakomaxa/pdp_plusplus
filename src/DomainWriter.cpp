@@ -9,6 +9,7 @@
 #include "./gemmi/to_mmcif.hpp"
 #include "./gemmi/to_cif.hpp"
 
+#include "PDPParameters.hpp"
 #include "DomainWriter.hpp"
 #include "Segment.hpp"
 #include "SegmentComparator.hpp"
@@ -43,7 +44,7 @@ static DomainSeq filterDomainStructure(Domain& dom,
     return out_domain;
   }
   std::string fasta;
-  int n_model = 0;
+  int n_model = 0;  
   for (gemmi::Model& model : structure.models){
     n_model += 1;
     if (n_model > 1){
@@ -52,28 +53,46 @@ static DomainSeq filterDomainStructure(Domain& dom,
     gemmi::Model out_model = model;
     out_model.chains.clear();
     for (int si = 0; si < dom.getNseg(); si++) {
-      Segment& seg = dom.getSegmentAtPos(si);
+      Segment& seg = dom.getSegmentAtPos(si);      
       for (gemmi::Chain& chain : model.chains) {
 	gemmi::Chain out_chain = chain;
-	out_chain.residues.clear();
-	out_chain.name = chain.name;
-	for (gemmi::ResidueSpan& sub : chain.subchains()){	  
-	  std::string sub_id = sub.subchain_id();
-	  if (seg.getChain() == sub_id){
-	    for (gemmi::Residue& res : sub) {
-	      int seqid = std::stoi(res.label_seq.str());
+	if (PDPParameters::INPUT_FILETYPE == "pdb"){
+	  out_chain.residues.clear();
+	  out_chain.name = chain.name;
+	  if (seg.getChain() == chain.name){
+	    for (gemmi::Residue& res : chain.residues) {
+	      int seqid = stoi(res.seqid.str());
 	      if (seqid >= seg.getFromOrg() && seqid <= seg.getToOrg()){
 		out_chain.residues.push_back(res);
 	      }
 	    }
 	  }
-	  if (!sub.empty()){
-	    std::string seq = gemmi::make_one_letter_sequence(sub);
-	    fasta += ">chain_" + sub_id + "_segment_" + std::to_string(si) + "\n" + seq + "\n";
+	  gemmi::ResidueSpan polymer=out_chain.get_polymer();
+	  if (!polymer.empty()){
+	    std::string seq = gemmi::make_one_letter_sequence(polymer);
+	    fasta += ">auth_asym_id=" + chain.name + " segment=" + std::to_string(si) + " start:auth_seq_id=" + std::to_string(seg.getFromOrg()) + " end:auth_seq_id=" + std::to_string(seg.getToOrg())  + "\n" + seq + "\n";
 	  }
-	}
-	if (!out_chain.residues.empty()){
-	  out_model.chains.push_back(std::move(out_chain));
+	}else{
+	  for (gemmi::ResidueSpan& sub : chain.subchains()){
+	    out_chain.residues.clear();
+	    std::string sub_id = sub.subchain_id();
+	    if (seg.getChain() == sub_id){
+	      for (gemmi::Residue& res : sub) {
+		int seqid = std::stoi(res.label_seq.str());
+		if (seqid >= seg.getFromOrg() && seqid <= seg.getToOrg()){
+		  out_chain.residues.push_back(res);
+		}
+	      }
+	    }
+	    gemmi::ResidueSpan polymer=out_chain.get_polymer();
+	    if (!polymer.empty()){
+	      std::string seq = gemmi::make_one_letter_sequence(out_chain.get_polymer());
+	      fasta += ">label_asym_id=" + sub_id + " segment=" + std::to_string(si) + " start:label_seq_id=" + std::to_string(seg.getFromOrg()) + " end:label_seq_id=" + std::to_string(seg.getToOrg())  + "\n" + seq + "\n";
+	    }
+	    if (!out_chain.residues.empty()){
+	      out_model.chains.push_back(std::move(out_chain));
+	    }
+	  }
 	}
       }
     }

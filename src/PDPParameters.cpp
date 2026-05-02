@@ -22,6 +22,7 @@ const float PDPParameters::CUT_OFF_VALUE1S = .19f;
 const float PDPParameters::CUT_OFF_VALUE1M = .21f;
 const int PDPParameters::MIN_CHAIN_LENGTH = 3;
 const int PDPParameters::MIN_STRUCT_SIZE = 3;
+std::string PDPParameters::INPUT_FILETYPE;
 bool PDPParameters::VERBOSE = false;
 
 void PDPParameters::setMAXLEN(int MAXLEN){

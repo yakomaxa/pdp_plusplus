@@ -12,7 +12,7 @@ void listdomains(std::vector<Domain>& domains, const std::string& filename);
 
 void writeDomainFiles(std::vector<Domain>& domains,
 		      std::vector<Domain>& naive_domains,
-                      const Structure& s,
+                      Structure& s,
                       const std::string& prefix,
                       std::vector<std::string> formats,
                       const std::string& input_path = "",
