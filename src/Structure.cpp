@@ -84,8 +84,9 @@ std::vector<Atom> Structure::getRepresentativeAtomArray(){
     }
     for (gemmi::Chain& chain : model.chains) {
       CA_flag=0;
-      for (gemmi::Residue& residue : chain.residues) {
-	for (gemmi::Atom &atom : residue.atoms) {
+      gemmi::ConstResidueSpan polymer = chain.get_polymer();
+      for (const gemmi::Residue& residue : polymer) {	
+	for (const gemmi::Atom &atom : residue.atoms) {
 	  std::string elementname = atom.element.name();
 	  if (atom.name == "CA" && elementname == "C"){
 	    index += 1;
