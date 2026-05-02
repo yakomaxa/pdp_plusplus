@@ -55,8 +55,8 @@ Structure::Structure(std::string filename){
     }
     for (gemmi::Chain& chain : model.chains) {
       for (gemmi::ResidueSpan& sub : chain.subchains()){
+	std::string sub_id = sub.subchain_id();
 	if ( sub.length() <= PDPParameters::MIN_CHAIN_LENGTH){
-	  std::string sub_id = sub.subchain_id();
 	  if (PDPParameters::VERBOSE){
 	    std::cout << "[Structure.cpp]: Subchain " << sub_id << " was skipped as it's shorter than or equal to " << PDPParameters::MIN_CHAIN_LENGTH << std::endl;
 	  }	  
@@ -66,7 +66,9 @@ Structure::Structure(std::string filename){
 	//int resi = 1;
 	for (gemmi::Residue& residue : sub) {
 	  if (!is_integer(residue.label_seq.str())){
-	    std::cout << residue.seqid.str() << std::endl;
+	    if (PDPParameters::VERBOSE){
+	      std::cout << "[Structure.cpp]: As label_seq =" <<  residue.label_seq.str() << " for the residue with label_asym_id=" << sub_id << " and auth_asym_id=" << chain.name  <<  " seems not to be integer, residue.seqid = " << residue.seqid.str() << " is copied to label_seq (i.e. label_seq_id for subchain)" << std::endl;
+	    }	  	    
 	    residue.label_seq = stoi(residue.seqid.str()) ;
 	    //residue.label_seq = resi;
 	    //resi += 1;
