@@ -57,7 +57,8 @@ static DomainSeq filterDomainStructure(Domain& dom,
 	gemmi::Chain out_chain = chain;
 	out_chain.residues.clear();
 	out_chain.name = chain.name;
-	for (const gemmi::Residue& res : chain.residues) {
+	for (const gemmi::Residue& res : polymer) {
+	  std::cout << res.name << std::endl;
 	  int seqid = std::stoi(res.label_seq.str());
 	  if (seqid >= seg.getFromOrg() && seqid <= seg.getToOrg()){
 	    out_chain.residues.push_back(res);
