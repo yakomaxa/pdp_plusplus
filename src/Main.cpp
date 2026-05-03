@@ -20,7 +20,7 @@ struct OutFlags {
   bool cif          = false;
   bool pml          = false;
   bool json         = false;
-  bool fasta         = false;
+  bool fasta        = false;
   bool include_path = false;
 };
 
@@ -206,7 +206,8 @@ int main(int argc, char* argv[]) {
   if (PDPParameters::VERBOSE) listdomains(domains);
   if (outflags.pml) listdomains(domains, outprefix + "_removed.pml");
 
-  std::vector<Domain>& dump_domains = (outstage == DomainStage::NAIVE) ? naive_domains : domains;
+  //std::vector<Domain>& dump_domains = (outstage == DomainStage::NAIVE) ? naive_domains : domains;
+  bool is_naive = (outstage == DomainStage::NAIVE);
   std::vector<std::string> formats;
   if (outflags.pdb){
     formats.push_back("PDB");
@@ -221,7 +222,7 @@ int main(int argc, char* argv[]) {
     formats.push_back("JSON");
   }
   if (formats.size()>0){
-    writeDomainFiles(dump_domains, naive_domains, s, outprefix, formats, filename, outflags.include_path);
+    writeDomainFiles(domains, naive_domains, s, outprefix, formats, filename, is_naive, outflags.include_path);
   }
 
   return 0;

@@ -14,21 +14,27 @@ void writeDomainFiles(std::vector<Domain>& domains,
 		      std::vector<Domain>& naive_domains,
                       Structure& s,
                       const std::string& prefix,
-                      std::vector<std::string> formats,
+                      std::vector<std::string>&formats,
                       const std::string& input_path = "",
+		      bool is_naive = false,
                       bool include_path = false);
 
 void writeDomainJson(std::vector<Domain>& naive_domains,
-                     std::vector<Domain>& cleaned_domains,
-                     const std::string& prefix);
+		     const std::vector<std::vector<std::vector<std::string>>>& data_for_json,
+		     const std::vector<std::string>& tf_table,
+                     const std::string& prefix,
+		     const std::vector<std::string>& formats,
+		     bool is_naive)  ;
 
 class DomainSeq {
 public:
   gemmi::Structure structure;
   std::string sequence;
-  void setValues(gemmi::Structure s, std::string n){
+  std::vector<std::vector<std::string>> data;
+  void setValues(gemmi::Structure s, std::string n, std::vector<std::vector<std::string>> v){
     structure = s;
     sequence = n;
+    data = v;
   }
 };
 
