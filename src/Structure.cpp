@@ -69,14 +69,6 @@ Structure::Structure(std::string filename){
 	//int resi = 1;
 	int num_calpha_of_chain = 0;
 	for (gemmi::Residue& residue : sub) {
-	  if (!is_integer(residue.label_seq.str())){
-	    if (PDPParameters::VERBOSE){
-	      std::cout << "[Structure.cpp]: As label_seq =" <<  residue.label_seq.str() << " for the residue with residue.name=" << residue.name << " label_asym_id=" << sub_id << " and auth_asym_id=" << chain.name  <<  " seems not to be integer, residue.seqid = " << residue.seqid.str() << " is copied to label_seq (i.e. label_seq_id for subchain)" << std::endl;
-	    }	  	    
-	    residue.label_seq = stoi(residue.seqid.str()) ;
-	    //residue.label_seq = resi;
-	    //resi += 1;
-	  }
 	  for (const gemmi::Atom &atom : residue.atoms) {
 	    std::string elementname = atom.element.name();
 	    if (atom.name == "CA" && elementname == "C"){
@@ -141,15 +133,36 @@ std::vector<Atom> Structure::getRepresentativeAtomArray(){
 		Atoms[index].setChain(chain.name);
 		resi=stoi(residue.seqid.str());
 	      }else{
-		Atoms[index].setChain(sub_id);
-		resi=stoi(residue.label_seq.str());
+		if (!is_integer(residue.label_seq.str()) || sub_id == ""){
+		  // deal with ill mmCIF. label_seq_id is not integer OR sub_id is blank -> do not assume it's a good mmCIF.
+		  if (PDPParameters::VERBOSE){
+		    std::cout <<  "[Structure.cpp] Falling back to PDB-like read-mode as the input seems to be mmCIF but does not have label_(asym_id|seq_id) items. Maybe this is an mmCIF file generated from PDB file." << std::endl; 
+		    if(!is_integer(residue.label_seq.str())){
+		      std::cout << "[Structure.cpp]: As label_seq =" <<  residue.label_seq.str() << " for the residue with residue.name=" << residue.name << " label_asym_id=" << sub_id << " and auth_asym_id=" << chain.name  <<  " seems not to be integer, residue.seqid = " << residue.seqid.str() << " is copied to label_seq (i.e. label_seq_id for subchain) and the process actually uses auth_label_id" << std::endl;
+		    }
+		    if (sub_id == ""){
+		      std::cout << "[Structure.cpp]: As label_asym_id (subchain id in terms of gemmi) seems to be blank (=[" << sub_id << "]) so that we use auth_asym_id=" << chain.name  << std::endl;
+		    }
+		  }
+		  // overwrite label_seq if label_seq_id is not integer
+		  if (!is_integer(residue.label_seq.str())){
+		    residue.label_seq = stoi(residue.seqid.str()) ;
+		  }
+		  // use auth_seq_id instead
+		  resi = stoi(residue.seqid.str()) ;
+		  Atoms[index].setChain(chain.name);
+		}else{
+		  // Here's the actual logic for well-written mmCIF.
+		  Atoms[index].setChain(sub_id);
+		  resi=stoi(residue.label_seq.str());
+		}
 	      }
 
 	      Atoms[index].setIndexOrg(resi);
 	      Atoms[index].setChainId(chainid);
 	      Atoms[index].setResidue(residue.name);
 	      if (PDPParameters::VERBOSE){
-		std::cout  << "[Structure.cpp] " << index << "-th Representative atom coordinate was taken from: " <<  Atoms[index].getChain() << " " << Atoms[index].getIndexOrg() << " "<< Atoms[index].getChainId()  << " " << Atoms[index].getResidue() <<  std::endl;
+		std::cout  << "[Structure.cpp] " << index << "-th Representative atom coordinate was taken from: chain = [" <<  Atoms[index].getChain() << "] Residue number (label or auth) = [" << Atoms[index].getIndexOrg() << "] Internally assigned chainID = ["<< Atoms[index].getChainId()  << "] Residue name = [" << Atoms[index].getResidue() << "]" <<  std::endl;
 	      }
 	      if (maxindex < index){
 		maxindex = index;
@@ -159,7 +172,7 @@ std::vector<Atom> Structure::getRepresentativeAtomArray(){
 	    }
 	    if (atom.name == "CB" && elementname == "C" && CA_flag == 1){
 	      if (PDPParameters::VERBOSE){
-		std::cout  << "[Structure.cpp] " << index << "-th Representative atom coordinate was updated to C-beta from: "<<  Atoms[index].getChain() << " " << Atoms[index].getIndexOrg() << " "<< Atoms[index].getChainId()  << " " << Atoms[index].getResidue() <<  std::endl;
+		std::cout  << "[Structure.cpp] " << index << "-th Representative atom coordinate was updated to C-beta from: chain = [" <<  Atoms[index].getChain() << "] Residue number (label or auth) = [" << Atoms[index].getIndexOrg() << "] Internally assigned chainID = ["<< Atoms[index].getChainId()  << "] Residue name = [" << Atoms[index].getResidue() << "]" <<  std::endl;
 	      }
 	      Atoms[index].setX(atom.pos.x);
 	      Atoms[index].setY(atom.pos.y);
@@ -168,6 +181,9 @@ std::vector<Atom> Structure::getRepresentativeAtomArray(){
 	  }
 	}
 	if (chain_has_calpha==1){
+	  if (PDPParameters::VERBOSE){
+	    std::cout  << "[Structure.cpp] Adding internal residue id = [" << index << "] to the list of forced cut sites." << std::endl;
+	  }
 	  this->tailofchain.push_back(index);
 	  chainid++;
 	}
