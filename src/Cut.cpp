@@ -431,7 +431,7 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
     
     if(verbose){
       std::cout << max_contacts[l] << std::endl;
-      printf("[Cut.cpp] double cut: %i %s %i %i c=%d mc=%d x=%f y=%f s1=%i s2=%i cd=%f cd/ad=%f\n",l,ca[iclose[l]].getResidue().c_str(),iclose[l],jclose[l],contacts[l],max_contacts[l],x,y,size11,size22,contact_density[l],contact_density[l]/val.AD);
+      printf("[Cut.cpp] double cut: l=%i residue_i=%s resi=%i residue_j=%s resj=%i contact=%d max_contact=%d x=%f y=%f size11=%i size22=%i contact_density=%f contact_desnsity/average_density=%f\n",l,ca[iclose[l]].getResidue().c_str(),iclose[l],ca[jclose[l]].getResidue().c_str(),jclose[l],contacts[l],max_contacts[l],x,y,size11,size22,contact_density[l],contact_density[l]/val.AD);
     }
     
     if((contact_density[l]/val.AD+PDPParameters::DBL)<val.s_min&&contact_density[l]/val.AD+PDPParameters::DBL<PDPParameters::CUT_OFF_VALUE2) {
