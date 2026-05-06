@@ -8,8 +8,8 @@ public:
     double s_min;
     int site2;
     bool first_cut;
-
     double AD;
+    int generation;
 
     CutValues();
     ~CutValues();

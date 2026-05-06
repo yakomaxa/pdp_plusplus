@@ -131,14 +131,15 @@ void CutDomain::cutDomain(Domain& dom, CutSites& cut_sites,PDPDistanceMatrix& pd
     if(verbose_cut){
       printf("[CutDomain.cpp] cutr dom1: nseg %d\n",dom1.getNseg());
     }
-
+    val.generation +=1;
+    
     if ( verbose_cut){
       for(int iv=0;iv<dom1.getNseg();iv++){
-	printf("[CutDomain.cpp] cutr dom1 from %d to %d\n",dom1.getSegmentAtPos(iv).getFrom(),dom1.getSegmentAtPos(iv).getTo());
+	printf("[CutDomain.cpp] Concluding Cut at generation %d: dom 1 has segment %d dom1 from %d to %d\n",val.generation, iv, dom1.getSegmentAtPos(iv).getFrom(),dom1.getSegmentAtPos(iv).getTo());
       }
     }
 
-    
+
     cutDomain(dom1, cut_sites, pdpMatrix, val);
 
     /**
@@ -162,12 +163,11 @@ void CutDomain::cutDomain(Domain& dom, CutSites& cut_sites,PDPDistanceMatrix& pd
     
     if (verbose_cut){
       for(int iv=0;iv<dom2.getNseg();iv++){
-        printf("[CutDomain.cpp] cutr dom2 from %d to %d\n",dom2.getSegmentAtPos(iv).getFrom(),dom2.getSegmentAtPos(iv).getTo());
+        printf("[CutDomain.cpp] Concluding Cut at generation %d: dom 2 has segment %d dom2 from %d to %d\n", val.generation, iv, dom2.getSegmentAtPos(iv).getFrom(),dom2.getSegmentAtPos(iv).getTo());
       }
     }
 
-
-
+    
     cutDomain(dom2, cut_sites, pdpMatrix, val);
 
 };
