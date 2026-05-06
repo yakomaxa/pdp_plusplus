@@ -288,14 +288,14 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
     to1=dom.getSegmentAtPos(jseg).getTo();
     
     /************ count contacts *****************/
-    contacts[nc] = 1;
+    contacts[l] = 1;
     
     /******* contacts between [0,iseg[ and ]iseg,jseg[ ********/
     for(int kseg=0;kseg<iseg;kseg++){
       for(int lseg=iseg+1;lseg<jseg;lseg++){
 	for( int ii=dom.getSegmentAtPos(kseg).getFrom();ii<dom.getSegmentAtPos(kseg).getTo();ii++){
 	  for(int jj=dom.getSegmentAtPos(lseg).getFrom();jj<dom.getSegmentAtPos(lseg).getTo();jj++) {
-	    contacts[nc]+=(dist[ii][jj]);
+	    contacts[l]+=(dist[ii][jj]);
 	  }
 	}
       }
@@ -306,7 +306,7 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
       for(int lseg=iseg+1;lseg<jseg;lseg++){
 	for(int ii=dom.getSegmentAtPos(kseg).getFrom();ii<dom.getSegmentAtPos(kseg).getTo();ii++){
 	  for(int jj=dom.getSegmentAtPos(lseg).getFrom();jj<dom.getSegmentAtPos(lseg).getTo();jj++) {
-	    contacts[nc]+=(dist[jj][ii]);
+	    contacts[l]+=(dist[jj][ii]);
 	  }
 	}
       }
@@ -317,21 +317,21 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
     if(iseg==jseg) {
       for(int ii=from;ii<=iclose[l];ii++) {
 	for (int jj=iclose[l]+1;jj<=jclose[l];jj++) {
-	  contacts[nc]+=(dist[ii][jj]);
+	  contacts[l]+=(dist[ii][jj]);
 	}
       }
       for (int jj=iclose[l]+1;jj<jclose[l];jj++) {
 	for(int kseg=0;kseg<iseg;kseg++){
 	  for(int ii=dom.getSegmentAtPos(kseg).getFrom();ii<dom.getSegmentAtPos(kseg).getTo();ii++) {
-	    contacts[nc]+=(dist[ii][jj]);
+	    contacts[l]+=(dist[ii][jj]);
 	  }
 	}
 	for(int ii=jclose[l];ii<to;ii++) {
-	  contacts[nc]+=(dist[jj][ii]);
+	  contacts[l]+=(dist[jj][ii]);
 	}
 	for(int kseg=iseg+1;kseg<dom.getNseg();kseg++){
 	  for(int ii=dom.getSegmentAtPos(kseg).getFrom();ii<dom.getSegmentAtPos(kseg).getTo();ii++) {
-	    contacts[nc]+=(dist[jj][ii]);
+	    contacts[l]+=(dist[jj][ii]);
 	  }
 	}
       }
@@ -340,49 +340,49 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
       for(int ii=from;ii<=iclose[l];ii++) {
 	for(int kseg=iseg+1;kseg<jseg;kseg++){
 	  for(int jj=dom.getSegmentAtPos(kseg).getFrom();jj<dom.getSegmentAtPos(kseg).getTo();jj++) {
-	    contacts[nc]+=(dist[ii][jj]);
+	    contacts[l]+=(dist[ii][jj]);
 	  }
 	}
 	for(int jj=from1;jj<jclose[l];jj++) {
-	  contacts[nc]+=(dist[ii][jj]);
+	  contacts[l]+=(dist[ii][jj]);
 	}
 	for(int jj=iclose[l]+1;jj<to;jj++) {
-	  contacts[nc]+=(dist[ii][jj]);
+	  contacts[l]+=(dist[ii][jj]);
 	}
       }
       for(int ii=iclose[l]+1;ii<to;ii++) {
 	for(int kseg=0;kseg<iseg;kseg++){
 	  for(int jj=dom.getSegmentAtPos(kseg).getFrom();jj<dom.getSegmentAtPos(kseg).getTo();jj++) {
-	    contacts[nc]+=(dist[jj][ii]);
+	    contacts[l]+=(dist[jj][ii]);
 	  }
 	}
 	for(int kseg=jseg+1;kseg<dom.getNseg();kseg++){
 	  for(int jj=dom.getSegmentAtPos(kseg).getFrom();jj<dom.getSegmentAtPos(kseg).getTo();jj++) {
-	    contacts[nc]+=(dist[ii][jj]);
+	    contacts[l]+=(dist[ii][jj]);
 	  }
 	}
 	for(int jj=jclose[l];jj<=to1;jj++) {
-	  contacts[nc]+=(dist[ii][jj]);
+	  contacts[l]+=(dist[ii][jj]);
 	}
       }
       for (int ii=from1;ii<jclose[l];ii++) {
 	for(int kseg=0;kseg<iseg;kseg++){
 	  for(int jj=dom.getSegmentAtPos(kseg).getFrom();jj<dom.getSegmentAtPos(kseg).getTo();jj++) {
-	    contacts[nc]+=(dist[jj][ii]);
+	    contacts[l]+=(dist[jj][ii]);
 	  }
 	}
 	for(int kseg=jseg+1;kseg<dom.getNseg();kseg++)  {
 	  for(int jj=dom.getSegmentAtPos(kseg).getFrom();jj<dom.getSegmentAtPos(kseg).getTo();jj++)
-	    contacts[nc]+=(dist[ii][jj]);
+	    contacts[l]+=(dist[ii][jj]);
 	}
 	for(int jj=jclose[l];jj<to1;jj++) {
-	  contacts[nc]+=(dist[ii][jj]);
+	  contacts[l]+=(dist[ii][jj]);
 	}
       }
       for(int ii=jclose[l];ii<to1;ii++){
 	for(int kseg=iseg+1;kseg<jseg;kseg++){
 	  for(int jj=dom.getSegmentAtPos(kseg).getFrom();jj<dom.getSegmentAtPos(kseg).getTo();jj++) {
-	    contacts[nc]+=(dist[jj][ii]);
+	    contacts[l]+=(dist[jj][ii]);
 	  }
 	}
       }
@@ -423,19 +423,19 @@ int Cut::cut(std::vector<Atom>& ca,Domain& dom,CutValues& val,
     x=std::min(pow(x,1.3/3)+PDPParameters::RG,pow(x,1.1/3)+pow(PDPParameters::TD,1.3/3)+PDPParameters::RG);
     y=std::min(pow(y,1.3/3)+PDPParameters::RG,pow(y,1.1/3)+pow(PDPParameters::TD,1.3/3)+PDPParameters::RG);
     
-    max_contacts[nc] = (int)(x*y*10);
+    max_contacts[l] = (int)(x*y*10);
     if(size1>150){
-      max_contacts[nc] = (int)(9*x*y); // the original code seems to have wrong index max_contacts[k] instead of [nc] here. 
+      max_contacts[l] = (int)(9*x*y); // the original code seems to have wrong index max_contacts[k] instead of [l] here. 
     }
-    contact_density[nc]=(double)contacts[nc]/(double)max_contacts[nc]; 
+    contact_density[l]=(double)contacts[l]/(double)max_contacts[l]; 
     
     if(verbose){
-      std::cout << max_contacts[nc] << std::endl;
-      printf("[Cut.cpp] double cut: %i %s %i %i c=%d mc=%d x=%f y=%f s1=%i s2=%i cd=%f cd/ad=%f\n",l,ca[iclose[l]].getResidue().c_str(),iclose[l],jclose[l],contacts[nc],max_contacts[nc],x,y,size11,size22,contact_density[nc],contact_density[nc]/val.AD);
+      std::cout << max_contacts[l] << std::endl;
+      printf("[Cut.cpp] double cut: %i %s %i %i c=%d mc=%d x=%f y=%f s1=%i s2=%i cd=%f cd/ad=%f\n",l,ca[iclose[l]].getResidue().c_str(),iclose[l],jclose[l],contacts[l],max_contacts[l],x,y,size11,size22,contact_density[l],contact_density[l]/val.AD);
     }
     
-    if((contact_density[nc]/val.AD+PDPParameters::DBL)<val.s_min&&contact_density[nc]/val.AD+PDPParameters::DBL<PDPParameters::CUT_OFF_VALUE2) {
-      val.s_min = (contact_density[nc]/val.AD)+PDPParameters::DBL;
+    if((contact_density[l]/val.AD+PDPParameters::DBL)<val.s_min&&contact_density[l]/val.AD+PDPParameters::DBL<PDPParameters::CUT_OFF_VALUE2) {
+      val.s_min = (contact_density[l]/val.AD)+PDPParameters::DBL;
       site_min=iclose[l];
       val.site2=jclose[l];
     }
